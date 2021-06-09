@@ -1,0 +1,15 @@
+{
+  "name": "simple-concurrent-todo-lists",
+  "version": "0.1.0",
+  "description": "IASC G1",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "IASC 2021 1C G1",
+  "license": "ISC",
+  "dependencies": {
+    "express": "4.17.1"
+  }
+}
