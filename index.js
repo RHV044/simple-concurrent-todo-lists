@@ -38,8 +38,4 @@ const server = app.listen(port, () => {
         );
 });
 
-process.on('SIGTERM', () => {
-    console.info('SIGTERM signal received.');
-    axios.delete(Utils.getUrlForPort(Config.getRegistryPort()), { port: port });
-    server.close(() => console.log("Closed server"));
-});
+// TODO: add gracefull close
