@@ -1,50 +1,35 @@
-const { default: axios } = require('axios');
 const express = require('express');
-const ClusterPortsRepository = require('../repositories/cluster-ports-repository');
-const Utils = require('../utils');
-const Config = require('../config');
+const NodesService = require('../services/nodes-service');
+const nodesService = new NodesService();
 const router = express.Router();
 
-// TODO: asking for healthcheck
-
+/** 
+ * GET /node
+ * 
+ * Returns all the available nodes ports.
+ */
 router.get('/', (req, res) => {
-    return res.json({ status: 'ok', ports: ClusterPortsRepository.getInstance().list() });
+    return res.json({ status: 'ok', ports: nodesService.get() });
 });
 
+/** 
+ * POST /node 
+ * { port: 8000 }
+ * 
+ * Creates a new node on the given port.
+ */
 router.post('/', (req, res) => {
-    let port = req.body.port;
-
-    // If it's the registry then we should let know the nodes that a new port is available.
-    if (Config.isRegistry) {
-        ClusterPortsRepository.getInstance().list().forEach(availablePort => {
-            axios.post(Utils.getUrlForPort(availablePort), { port: port });
-        });
-    }
-
-    // Add the port to the repository
-    ClusterPortsRepository.getInstance().add(port);
-    let availablePorts = ClusterPortsRepository.getInstance().list();
-    console.log(`Added port ${port}, then available ports are: ${availablePorts}`);
-
-    // Return the available ports
-    return res.json({ status: 'ok', ports: availablePorts });
+    return res.json({ status: 'ok', ports: nodesService.add(req.body.port) });
 });
 
-router.delete('/', (req, res) => {
-    let port = req.body.port;
 
-    // If it's the registry then we should let know the nodes that the port is not more available.
-    if (Config.isRegistry) {
-        ClusterPortsRepository.getInstance().list().forEach(availablePort => {
-            axios.delete(Utils.getUrlForPort(availablePort), { port: port });
-        });
-    }
-
-    // Remove the port from the list
-    ClusterPortsRepository.getInstance().remove(port);
-    console.log(`Removed port ${port}, then available ports are: ${ClusterPortsRepository.getInstance().list()}`)
-
-    // Return a success answer
+/** 
+ * DELETE /node/8000 
+ * 
+ * Deletes the node with the given port.
+ */
+router.delete('/:port', (req, res) => {
+    nodesService.delete(req.params.port);
     return res.json({ status: 'ok' });
 });
 

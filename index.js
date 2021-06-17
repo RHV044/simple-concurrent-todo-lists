@@ -12,6 +12,10 @@ const nodeController = require('./src/controllers/nodes-controller');
 const ClusterPortsRepository = require('./src/repositories/cluster-ports-repository');
 
 const port = process.argv[2];
+if (!port) {
+    console.error("ERROR: Please specify the port!");
+    return;
+}
 
 app.use(express.json());
 app.use('/health-check', healthCheckController);
