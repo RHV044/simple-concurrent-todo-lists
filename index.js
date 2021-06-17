@@ -3,9 +3,9 @@ const axios = require('axios');
 
 const app = new express();
 
-const Utils = require('./src/utils')
-const Config = require('./src/config')
-const healthCheckController = require('./src/controllers/health-check-controller')
+const Utils = require('./src/utils');
+const Config = require('./src/config');
+const healthCheckController = require('./src/controllers/health-check-controller');
 const listsController = require('./src/controllers/lists-controller');
 const nodeController = require('./src/controllers/nodes-controller');
 
