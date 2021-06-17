@@ -4,7 +4,6 @@ class Config {
         this.isRegistry = false;
     }
 
-
     static getRegistryPort() {
         return 9000;
     }

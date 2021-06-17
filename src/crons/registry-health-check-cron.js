@@ -23,7 +23,7 @@ class RegistryHealthCheckCron {
          *  │ │ │ │ │ │
          *  * * * * * *
          */
-        this.cron = cron.schedule(`*/10 * * * * *`, () => this.doHealthCheck());
+        this.cron = cron.schedule(`* */${CRON_MINUTE_SCHEDULE} * * * *`, () => this.doHealthCheck());
     }
 
     stop() {
