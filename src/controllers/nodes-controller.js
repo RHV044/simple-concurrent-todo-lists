@@ -5,6 +5,8 @@ const Utils = require('../utils');
 const Config = require('../config');
 const router = express.Router();
 
+// TODO: asking for healthcheck
+
 router.get('/', (req, res) => {
     return res.json({ status: 'ok', ports: ClusterPortsRepository.getInstance().list() });
 });
