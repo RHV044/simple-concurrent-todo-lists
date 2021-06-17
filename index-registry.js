@@ -5,8 +5,8 @@ const Config = require('./src/config');
 
 Config.setIsRegistry(true);
 
-app.listen(9000, () => {
-    console.log("Listening on port 9000");
+app.listen(Config.getRegistryPort(), () => {
+    console.log(`Listening on port ${Config.getRegistryPort()}`);
 });
 
 app.use(express.json());
