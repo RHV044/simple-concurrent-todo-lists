@@ -1,8 +1,8 @@
 const { default: axios } = require('axios');
 const express = require('express');
 const ClusterPortsRepository = require('../repositories/cluster-ports-repository');
-const utils = require('../utils');
-const config = require('../config');
+const Utils = require('../utils');
+const Config = require('../config');
 const router = express.Router();
 
 router.get('/', (req, res) => {
@@ -13,9 +13,9 @@ router.post('/', (req, res) => {
     let port = req.body.port;
 
     // If it's the registry then we should let know the nodes that a new port is available.
-    if (config.isRegistry) {
+    if (Config.isRegistry) {
         ClusterPortsRepository.getInstance().list().forEach(availablePort => {
-            axios.post(utils.getUrlForPort(availablePort), { port: port });
+            axios.post(Utils.getUrlForPort(availablePort), { port: port });
         });
     }
 
@@ -32,9 +32,9 @@ router.delete('/', (req, res) => {
     let port = req.body.port;
 
     // If it's the registry then we should let know the nodes that the port is not more available.
-    if (config.isRegistry) {
+    if (Config.isRegistry) {
         ClusterPortsRepository.getInstance().list().forEach(availablePort => {
-            axios.delete(utils.getUrlForPort(availablePort), { port: port });
+            axios.delete(Utils.getUrlForPort(availablePort), { port: port });
         });
     }
 

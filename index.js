@@ -3,7 +3,7 @@ const axios = require('axios');
 
 const app = new express();
 
-const utils = require('./src/utils')
+const Utils = require('./src/utils')
 const healthCheckController = require('./src/controllers/health-check-controller')
 const listsController = require('./src/controllers/lists-controller');
 const nodeController = require('./src/controllers/nodes-controller');
@@ -20,9 +20,9 @@ app.use('/node', nodeController);
 
 const server = app.listen(port, () => {
     console.log(`Listening on port ${port}`)
-    console.log(`Try to: ${utils.getUrlForPort(REGISTRY_PORT)}`)
+    console.log(`Try to: ${Utils.getUrlForPort(REGISTRY_PORT)}`)
     axios
-        .post(utils.getUrlForPort(REGISTRY_PORT), { port: port })
+        .post(Utils.getUrlForPort(REGISTRY_PORT), { port: port })
         .then(
             (response) => {
                 ClusterPortsRepository.getInstance().addAll(response.data.ports);
@@ -37,6 +37,6 @@ const server = app.listen(port, () => {
 
 process.on('SIGTERM', () => {
     console.info('SIGTERM signal received.');
-    axios.delete(utils.getUrlForPort(REGISTRY_PORT), { port: port });
+    axios.delete(Utils.getUrlForPort(REGISTRY_PORT), { port: port });
     server.close(() => console.log("Closed server"));
 });
