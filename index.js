@@ -1,11 +1,10 @@
 const express = require('express');
 const app = new express();
-const bodyParser = require("body-parser");
-let healthCheckRouter = require('./src/controllers/health-check-controller')
+let healthCheckController = require('./src/controllers/health-check-controller')
 let listsController = require('./src/controllers/lists-controller')
 
-app.use(bodyParser.json());
-app.use('/health-check', healthCheckRouter)
+app.use(express.json());
+app.use('/health-check', healthCheckController)
 app.use('/lists', listsController)
 
 app.listen(9001, () => {
