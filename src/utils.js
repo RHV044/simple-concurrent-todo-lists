@@ -9,8 +9,12 @@ class Utils {
         );
     }
 
-    static getUrlForPort(port) {
-        return Utils.formatString("http://localhost:{port}/node", { port: port });
+    static getNodeUrlForPort(port) {
+        return `${this.getBaseUrlForPort(port)}/node`
+    }
+
+    static getBaseUrlForPort(port) {
+        return Utils.formatString("http://localhost:{port}", { port: port });
     }
 }
 
