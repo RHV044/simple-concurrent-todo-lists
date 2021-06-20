@@ -15,11 +15,16 @@ class TodoListsService {
     performAction(id, action) {
         if (listRepository.checkAndSetAvailability(id)) {
             this.performingActions.set(id, action);
-            let checkNodesAvailability = nodesService.get().map((node) => this.askAvailability(node, id));
+            let checkNodesAvailability = nodesService.get().map(node => this.askAvailability(node, id));
             const nodesAvailabilities = Promise.all(checkNodesAvailability)
                 .then(responses => responses.map(response => response.isAvailable));
             
             // TODO: Check if there is quorum and then commit the action for every node.
+
+            return {
+                isOk: true,
+                list: [] // TODO: return the list with te action performed
+            }
 
         } else {
             return {
@@ -29,8 +34,8 @@ class TodoListsService {
         }
     }
 
-    isListAvailable(id) {
-        return listRepository.isAvailable(id);
+    checkAndSetAvailability(id) {
+        return listRepository.checkAndSetAvailability(id);
     }
 
     askAvailability(node, listId) {

@@ -9,7 +9,7 @@ const {response} = require('express');
  * POST /lists/:id
  * { "action": { "type": "DELETE", "element": 2 } }
  *
- * Performs any action in a list if possible.
+ * Performs any action in a list if possible. Returns the modified list or an error message.
  */
 router.post('/:id', (req, res) => {
     const listId = req.params.id
@@ -17,9 +17,9 @@ router.post('/:id', (req, res) => {
     const result = listsService.performAction(listId, action)
 
     if (result.isOk)
-        res.status(204).send();
+        res.status.json( { list: result.list } )
     else
-        res.status(409).json({"message": "Cannot perform action, you need to refresh the page."});
+        res.status(409).json({ message: result.message });
 });
 
 /**
@@ -28,7 +28,7 @@ router.post('/:id', (req, res) => {
  * Returns whether the list is available or blocked.
  */
 router.get('/:id/availability', (req, res) => {
-    res.json({ "isAvailable": listsService.isListAvailable(req.params.id) })
+    res.json({ isAvailable: listsService.checkAndSetAvailability(req.params.id) })
 })
 
 

@@ -19,11 +19,6 @@ class TodoListRepository {
         // TODO
         return true;
     }
-
-    isAvailable(id) {
-        // TODO
-        return true;
-    }
 }
 
 module.exports = TodoListRepository
