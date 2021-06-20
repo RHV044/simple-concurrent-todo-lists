@@ -25,7 +25,6 @@ class TodoListsService {
                 isOk: true,
                 list: [] // TODO: return the list with te action performed
             }
-
         } else {
             return {
                 isOk: false,

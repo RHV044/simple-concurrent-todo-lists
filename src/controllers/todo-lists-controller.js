@@ -17,9 +17,9 @@ router.post('/:id', (req, res) => {
     const result = listsService.performAction(listId, action)
 
     if (result.isOk)
-        res.status.json( { list: result.list } )
+        return res.status.json({ list: result.list })
     else
-        res.status(409).json({ message: result.message });
+        return res.status(409).json({ message: result.message })
 });
 
 /**
@@ -28,8 +28,7 @@ router.post('/:id', (req, res) => {
  * Returns whether the list is available or blocked.
  */
 router.get('/:id/availability', (req, res) => {
-    res.json({ isAvailable: listsService.checkAndSetAvailability(req.params.id) })
-})
-
+    return res.json({isAvailable: listsService.checkAndSetAvailability(req.params.id)})
+});
 
 module.exports = router;
