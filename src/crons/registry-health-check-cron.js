@@ -34,7 +34,7 @@ class RegistryHealthCheckCron {
         console.log(`Performing healthcheck at ${new Date()}...`)
         nodesService.get().forEach(port => {
             axios
-                .get(Utils.getUrlForPort(port))
+                .get(`${Utils.getUrlForPort(port)}/node`)
                 .then(
                     () => console.log(`The port ${port} is up`),
                     () => {

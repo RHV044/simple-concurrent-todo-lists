@@ -13,7 +13,7 @@ class NodesService {
         // If it's the registry then we should let know the nodes that a new port is available.
         if (Config.isRegistry) {
             ClusterPortsRepository.getInstance().list().forEach(availablePort => {
-                axios.post(Utils.getUrlForPort(availablePort), { port: port });
+                axios.post(`${Utils.getUrlForPort(availablePort)}/node`, { port: port });
             });
         }
 
@@ -33,7 +33,7 @@ class NodesService {
         // If it's the registry then we should let know the nodes that the port is not more available.
         if (Config.isRegistry) {
             ClusterPortsRepository.getInstance().list().forEach(availablePort => {
-                axios.delete(`${Utils.getUrlForPort(availablePort)}/${port}`);
+                axios.delete(`${Utils.getUrlForPort(availablePort)}/node/${port}`);
             });
         }
     }
