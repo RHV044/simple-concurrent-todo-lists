@@ -1,7 +1,7 @@
 class Utils {
 
     static getUrlForPort(port) {
-        return `http://localhost:${port}"`;
+        return `http://localhost:${port}`;
     }
 }
 
