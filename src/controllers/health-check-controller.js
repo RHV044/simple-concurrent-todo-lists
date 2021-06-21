@@ -18,7 +18,7 @@ router.get('/', (_, res) => {
 });
 
 /**
- * POST /health-check/teadown
+ * POST /health-check/teardown
  * { timeout: 3000 } 
  * 
  * Simulates that the node is down for the given timeout in ms.
