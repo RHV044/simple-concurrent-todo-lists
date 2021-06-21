@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const Utils = require('../utils');
 
 let isUp = true;
 
@@ -23,8 +24,12 @@ router.get('/', (_, res) => {
  * Simulates that the node is down for the given timeout in ms.
  */
 router.post('/teardown', (req, res) => {
+    Utils.log(`The instance is down`);
     isUp = false;
-    setTimeout(() => isUp = true, req.body.timeout);
+    setTimeout(() => {
+        isUp = true;
+        Utils.log(`The instance is up`);
+    }, req.body.timeout);
     return res.json({});
 });
 

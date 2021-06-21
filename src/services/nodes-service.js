@@ -20,7 +20,7 @@ class NodesService {
         // Add the port to the repository
         ClusterPortsRepository.getInstance().add(port);
         const availablePorts = ClusterPortsRepository.getInstance().list();
-        console.log(`Added port ${port}, then available ports are: ${availablePorts}`);
+        Utils.log(`Added port ${port}, then available ports are: ${availablePorts}`);
 
         return availablePorts;
     }
@@ -28,7 +28,7 @@ class NodesService {
     delete(port) {
         // Remove the port from the list
         ClusterPortsRepository.getInstance().remove(port);
-        console.log(`Removed port ${port}, then available ports are: ${ClusterPortsRepository.getInstance().list()}`)
+        Utils.log(`Removed port ${port}, then available ports are: ${ClusterPortsRepository.getInstance().list()}`)
 
         // If it's the registry then we should let know the nodes that the port is not more available.
         if (Config.isRegistry) {
