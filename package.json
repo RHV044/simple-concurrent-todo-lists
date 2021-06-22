@@ -5,13 +5,16 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.js",
+    "startRegistry": "node index-registry.js"
   },
   "keywords": [],
   "author": "IASC 2021 1C G1",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",
-    "express": "4.17.1"
+    "express": "4.17.1",
+    "axios": "0.21.1",
+    "node-cron": "3.0.0"
   }
 }
