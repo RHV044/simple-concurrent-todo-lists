@@ -4,7 +4,7 @@ const nodesService = new NodesService();
 const Utils = require('../utils');
 const cron = require('node-cron');
 
-const CRON_MINUTE_SCHEDULE = 5
+const TOTAL_RETRIES = 3;
 
 class RegistryHealthCheckCron {
 
@@ -23,7 +23,7 @@ class RegistryHealthCheckCron {
          *  │ │ │ │ │ │
          *  * * * * * *
          */
-        this.cron = cron.schedule(`* */${CRON_MINUTE_SCHEDULE} * * * *`, () => this.doHealthCheck());
+        this.cron = cron.schedule(`0 */10 * * * *`, () => this.doHealthCheck());
     }
 
     stop() {
@@ -31,19 +31,25 @@ class RegistryHealthCheckCron {
     }
 
     doHealthCheck() {
-        console.log(`Performing healthcheck at ${new Date()}...`)
-        nodesService.get().forEach(port => {
-            axios
-                .get(Utils.getNodeUrlForPort(port))
-                .then(
-                    () => console.log(`The port ${port} is up`),
-                    () => {
-                        console.log(`The port ${port} is down`);
+        Utils.log(`Performing health-check`);
+        nodesService.get().forEach(port => this.doHealthCheckOnNode(port));
+    }
+
+    doHealthCheckOnNode(port, pendingRetries = TOTAL_RETRIES) {
+        axios
+            .get(`${Utils.getNodeUrlForPort(port)}/health-check`)
+            .then(
+                () => Utils.log(`The port ${port} is up`),
+                () => {
+                    if (pendingRetries > 0) {
+                        Utils.log(`The port ${port} is down, retrying...`);
+                        setTimeout(() => this.doHealthCheckOnNode(port, pendingRetries - 1), 60000 * (TOTAL_RETRIES - pendingRetries + 1));
+                    } else {
+                        Utils.log(`The port ${port} is down`);
                         nodesService.delete(port);
                     }
-                )
-
-        });
+                }
+            );
     }
 }
 

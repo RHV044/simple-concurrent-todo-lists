@@ -1,20 +1,16 @@
 class Utils {
 
-    static formatString(template, args) {
-        return template.replace(
-            /{(\w+)}/g,
-            (placeholderWithDelimiters, placeholderWithoutDelimiters) => {
-                return args.hasOwnProperty(placeholderWithoutDelimiters) ? args[placeholderWithoutDelimiters] : placeholderWithDelimiters;
-            }
-        );
+    static getUrlForPort(port) {
+        return `http://localhost:${port}`;
     }
 
-    static getNodeUrlForPort(port) {
-        return `${this.getBaseUrlForPort(port)}/node`
+    static getCurrentTime() {
+        const date = new Date();
+        return `${date.getHours()}:${("0" + date.getMinutes()).slice(-2)}:${("0" + date.getSeconds()).slice(-2)}`;
     }
 
-    static getBaseUrlForPort(port) {
-        return Utils.formatString("http://localhost:{port}", { port: port });
+    static log(message) {
+        console.log(`${Utils.getCurrentTime()} >> ${message}`)
     }
 }
 

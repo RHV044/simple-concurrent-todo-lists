@@ -2,7 +2,6 @@ const express = require('express');
 const ListsService = require("../services/todo-lists-service");
 const router = express.Router()
 const listsService = new ListsService()
-const {default: axios} = require('axios');
 const {response} = require('express');
 
 /**

@@ -23,17 +23,17 @@ app.use('/lists', todoListsController);
 app.use('/node', nodeController);
 
 const server = app.listen(port, () => {
-    console.log(`Listening on port ${port}`)
+    Utils.log(`Listening on port ${port}`)
     axios
-        .post(Utils.getNodeUrlForPort(Config.getRegistryPort()), { port: port })
+        .post(`${Utils.getNodeUrlForPort(Config.getRegistryPort())}/node`, { port: port })
         .then(
             (response) => {
                 ClusterPortsRepository.getInstance().addAll(response.data.ports);
-                console.log(`Success initialization on registry. Available nodes are: ${ClusterPortsRepository.getInstance().list()}`);
+                Utils.log(`Success initialization on registry. Available nodes are: ${ClusterPortsRepository.getInstance().list()}`);
             },
             (error) => {
-                if (error.data) console.log(error.data);
-                server.close(() => console.log("Closed server since we cannot connect to the registry"));
+                if (error.data) Utils.log(error.data);
+                server.close(() => Utils.log("Closed server since we cannot connect to the registry"));
             }
         );
 });

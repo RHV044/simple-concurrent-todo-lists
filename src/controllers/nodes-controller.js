@@ -8,7 +8,7 @@ const router = express.Router();
  * 
  * Returns all the available nodes ports.
  */
-router.get('/', (req, res) => {
+router.get('/', (_, res) => {
     return res.json({ status: 'ok', ports: nodesService.get() });
 });
 

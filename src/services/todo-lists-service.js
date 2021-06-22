@@ -41,7 +41,7 @@ class TodoListsService {
         return axios.patch(`${Utils.getBaseUrlForPort(node)}/lists/${listId}/availability`)
             .then(response => response.data)
             .catch(error => {
-                console.log(`Error checking availability on node ${node} for list ${listId}`, error.response.data);
+                Utils.log(`Error checking availability on node ${node} for list ${listId}`, error.response.data);
                 return {"isAvailable": false} // TODO: Check if we want to retry.
             })
     }
