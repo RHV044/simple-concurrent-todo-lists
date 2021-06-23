@@ -4,6 +4,7 @@ const NodesService = require("./nodes-service");
 const listRepository = new TodoListRepository([]) // TODO: receive lists when starting the app and send it to repository
 const nodesService = new NodesService()
 const Utils = require('../utils');
+const Config = require('../config');
 
 class TodoListsService {
 
@@ -15,10 +16,12 @@ class TodoListsService {
     performAction(id, action) {
         if (listRepository.checkAndSetAvailability(id)) {
             this.performingActions.set(id, action);
-            let checkNodesAvailability = nodesService.get().map(node => this.askAvailability(node, id));
+            let checkNodesAvailability = nodesService.get()
+                .filter(node => node !== Config.selfPort)
+                .map(node => this.askAvailability(node, id));
             const nodesAvailabilities = Promise.all(checkNodesAvailability)
                 .then(responses => responses.map(response => response.isAvailable));
-            
+
             // TODO: Check if there is quorum and then commit the action for every node.
 
             return {
@@ -38,7 +41,7 @@ class TodoListsService {
     }
 
     askAvailability(node, listId) {
-        return axios.patch(`${Utils.getBaseUrlForPort(node)}/lists/${listId}/availability`)
+        return axios.patch(`${Utils.getUrlForPort(node)}/lists/${listId}/availability`)
             .then(response => response.data)
             .catch(error => {
                 Utils.log(`Error checking availability on node ${node} for list ${listId}`, error.response.data);

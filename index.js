@@ -24,8 +24,9 @@ app.use('/node', nodeController);
 
 const server = app.listen(port, () => {
     Utils.log(`Listening on port ${port}`)
+    Config.setSelfPort(port)
     axios
-        .post(`${Utils.getNodeUrlForPort(Config.getRegistryPort())}/node`, { port: port })
+        .post(`${Utils.getUrlForPort(Config.getRegistryPort())}/node`, { port: port })
         .then(
             (response) => {
                 ClusterPortsRepository.getInstance().addAll(response.data.ports);
