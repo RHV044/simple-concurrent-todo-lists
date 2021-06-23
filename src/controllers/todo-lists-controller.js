@@ -16,7 +16,7 @@ router.post('/:id', (req, res) => {
     const result = listsService.performAction(listId, action)
 
     if (result.isOk)
-        return res.status.json({ list: result.list })
+        return res.json({ list: result.list })
     else
         return res.status(409).json({ message: result.message })
 });
