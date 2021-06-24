@@ -17,31 +17,31 @@ class TodoListsService {
         })
     }
 
-    addElement(listId, element) {
+    addItem(listId, item) {
         return this.performAction(listId, _ => {
             // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
         })
     }
 
-    deleteElement(listId, index) {
+    deleteItem(listId, index) {
         return this.performAction(listId, _ => {
             // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
         })
     }
 
-    markReadiness(listId, index, isReady) {
+    markItemReadiness(listId, index, isReady) {
         return this.performAction(listId, _ => {
             // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
         })
     }
 
-    modifyElement(listId, index, item) {
+    modifyItem(listId, index, item) {
         return this.performAction(listId, _ => {
             // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
         })
     }
 
-    moveElement(listId, index, newIndex) {
+    moveItem(listId, index, newIndex) {
         return this.performAction(listId, _ => {
             // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
         })
