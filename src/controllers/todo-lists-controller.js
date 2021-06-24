@@ -83,7 +83,6 @@ router.put('/:id/items/:index', (req, res) => {
 
 /**
  * PATCH /lists/:id/items/:index/position
- *
  * { "new_index": 4 }
  *
  * Moves the item [index] to the new index.
