@@ -7,17 +7,51 @@ const Utils = require('../utils');
 
 class TodoListsService {
 
+    checkAndSetAvailability(id) {
+        return listRepository.checkAndSetAvailability(id);
+    }
+
+    createList(elements) {
+        return this.performAction(null, {
+            // TODO
+        })
+    }
+
+    addElement(listId, element) {
+        return this.performAction(listId, {
+            // TODO
+        })
+    }
+
+    deleteElement(listId, index) {
+        return this.performAction(listId, {
+            // TODO
+        })
+    }
+
+    markReadiness(listId, index, isReady) {
+        return this.performAction(listId, {
+            // TODO
+        })
+    }
+
+    modifyElement(listId, index, item) {
+        return this.performAction(listId, {
+            // TODO
+        })
+    }
+
+    moveElement(listId, index, newIndex) {
+        return this.performAction(listId, {
+            // TODO
+        })
+    }
+
     performAction(id, action) {
         if (id == null || this.checkAvailability(id)) {
             // if id == null that means it is a creation and there is no need to check for availability.
 
-            /* TODO: Commit the action for every node.
-
-            switch(action.type) {
-                case "CREATE_LIST": action.elements
-                case "DELETE": actions.index
-            } 
-            */
+            const list = action()
 
             return {
                 isOk: true,
@@ -29,10 +63,6 @@ class TodoListsService {
                 message: "Unable to modify list because is being modified by another user"
             }
         }
-    }
-
-    checkAndSetAvailability(id) {
-        return listRepository.checkAndSetAvailability(id);
     }
 
     /** Returns if the required list is available in this node and if there is quorum for the other nodes.

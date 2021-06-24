@@ -11,7 +11,7 @@ const listsService = new ListsService()
  */
 router.post('/', (req, res) => {
     const elements = req.body.elements
-    TodoListsController.handleAction( { type: "CREATE_LIST", elements: elements }, null, res)
+    TodoListsController.handleResult(listsService.createList(elements), res)
 })
 
 /**
@@ -32,7 +32,7 @@ router.patch('/:id/availability', (req, res) => {
 router.post('/:id/items', (req, res) => {
     const listId = req.params.id
     const item = req.body.item
-    TodoListsController.handleAction( { type: "ADD_ITEM", item: item }, listId, res)
+    TodoListsController.handleResult(listsService.addElement(listId, item), res)
 })
 
 /**
@@ -43,7 +43,7 @@ router.post('/:id/items', (req, res) => {
 router.delete('/:id/items/:index', (req, res) => {
     const listId = req.params.id
     const itemIndex = req.params.index
-    TodoListsController.handleAction( { type: "DELETE_ITEM", index: itemIndex }, listId, res)
+    TodoListsController.handleResult(listsService.deleteElement(listId, itemIndex), res)
 })
 
 /**
@@ -54,7 +54,7 @@ router.delete('/:id/items/:index', (req, res) => {
 router.patch('/:id/items/:index/ready', (req, res) => {
     const listId = req.params.id
     const itemIndex = req.params.index
-    TodoListsController.handleAction( { type: "READY_ITEM", index: itemIndex }, listId, res)
+    TodoListsController.handleResult(listsService.markReadiness(listId, itemIndex, true), res)
 })
 
 /**
@@ -65,7 +65,7 @@ router.patch('/:id/items/:index/ready', (req, res) => {
 router.patch('/:id/items/:index/unready', (req, res) => {
     const listId = req.params.id
     const itemIndex = req.params.index
-    TodoListsController.handleAction( { type: "UNREADY_ITEM", index: itemIndex }, listId, res)
+    TodoListsController.handleResult(listsService.markReadiness(listId, itemIndex, false), res)
 })
 
 /**
@@ -78,7 +78,7 @@ router.put('/:id/items/:index', (req, res) => {
     const listId = req.params.id
     const index = req.params.index
     const item = req.body.item
-    TodoListsController.handleAction( { type: "EDIT_ITEM", index: index, newItem: item }, listId, res)
+    TodoListsController.handleResult(listsService.modifyElement(listId, index, item), res)
 })
 
 /**
@@ -91,17 +91,15 @@ router.patch('/:id/items/:index/position', (req, res) => {
     const listId = req.params.id
     const itemIndex = req.params.index
     const newIndex = req.body.new_index
-    TodoListsController.handleAction( { type: "CHANGE_POSITION", index: itemIndex, newIndex: newIndex }, listId, res)
+    TodoListsController.handleResult(listsService.moveElement(listId, itemIndex, newIndex), res)
 })
 
 class TodoListsController {
-    static handleAction(action, listId, res) {
-        const result = listsService.performAction(listId, action)
-
+    static handleResult(result, res) {
         if (result.isOk)
-            return res.json({ list: result.list })
+            return res.json({list: result.list})
         else
-            return res.status(409).json({ message: result.message })
+            return res.status(409).json({message: result.message})
     }
 }
 
