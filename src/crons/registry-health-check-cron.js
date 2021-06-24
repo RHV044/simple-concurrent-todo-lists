@@ -37,7 +37,7 @@ class RegistryHealthCheckCron {
 
     doHealthCheckOnNode(port, pendingRetries = TOTAL_RETRIES) {
         axios
-            .get(`${Utils.getNodeUrlForPort(port)}/health-check`)
+            .get(`${Utils.getUrlForPort(port)}/health-check`)
             .then(
                 () => Utils.log(`The port ${port} is up`),
                 () => {
