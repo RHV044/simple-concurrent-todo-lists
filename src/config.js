@@ -2,7 +2,6 @@ class Config {
 
     constructor() {
         this.isRegistry = false;
-        this.selfPort = null;
     }
 
     static getRegistryPort() {
