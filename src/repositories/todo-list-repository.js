@@ -9,20 +9,24 @@ class TodoListRepository {
         this.lists.push(element)
     }
 
+    updateList(id, list) {
+        // TODO: Update list with the new one and return list
+    }
+
     addItem(id, item) {
         // TODO: Add item and return list
     }
 
-    modifyItem(id, index, item) {
-        // TODO: Modify item and return list
+    updateItem(id, index, item) {
+        // TODO: Update item and return list
     }
 
-    modifyItemReadyStatus(id, index, ready) {
-        // TODO: Modify item ready status and return list
+    updateItemReadyStatus(id, index, ready) {
+        // TODO: Update item ready status and return list
     }
 
-    modifyItemPosition(id, index, newIndex) {
-        // TODO: Modify item position and return list
+    updateItemPosition(id, index, newIndex) {
+        // TODO: Update item position and return list
     }
 
     deleteItem(id, index) {

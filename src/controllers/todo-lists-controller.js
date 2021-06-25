@@ -25,7 +25,6 @@ router.patch('/:id/availability', (req, res) => {
     return res.json({isAvailable: listsService.checkAndSetAvailability(req.params.id)})
 });
 
-// ---------------------- ITEM ENDPOINTS ----------------------//
 
 /**
  * POST /lists/:id/items
@@ -36,7 +35,7 @@ router.patch('/:id/availability', (req, res) => {
 router.post('/:id/items', (req, res) => {
     const listId = req.params.id
     const item = req.body.item
-    TodoListsController.handleResult(listsService.commitAddItem(listId, item), res)
+    TodoListsController.handleResult(listsService.performAddItem(listId, item), res)
 })
 
 /**
@@ -49,7 +48,7 @@ router.put('/:id/items/:index', (req, res) => {
     const listId = req.params.id
     const itemIndex = req.params.index
     const item = req.body.item
-    TodoListsController.handleResult(listsService.commitModifyItem(listId, itemIndex, item), res)
+    TodoListsController.handleResult(listsService.performUpdateItem(listId, itemIndex, item), res)
 })
 
 /**
@@ -63,7 +62,7 @@ router.put('/:id/items/:index', (req, res) => {
     const itemIndex = req.params.index
     const ready = req.query.status
     TodoListsController.handleResult(
-        listsService.commitModifyItemReadyStatus(listId, itemIndex, ready), res
+        listsService.performUpdateItemReadyStatus(listId, itemIndex, ready), res
     )
 })
 
@@ -78,7 +77,7 @@ router.patch('/:id/items/:index/position', (req, res) => {
     const itemIndex = req.params.index
     const newIndex = req.body.new_index
     TodoListsController.handleResult(
-        listsService.commitModifyItemPosition(listId, itemIndex, newIndex), res
+        listsService.performUpdateItemPosition(listId, itemIndex, newIndex), res
     )
 })
 
@@ -90,120 +89,28 @@ router.patch('/:id/items/:index/position', (req, res) => {
  router.delete('/:id/items/:index', (req, res) => {
     const listId = req.params.id
     const itemIndex = req.params.index
-    TodoListsController.handleResult(listsService.commitDeleteItem(listId, itemIndex), res)
+    TodoListsController.handleResult(listsService.performDeleteItem(listId, itemIndex), res)
 })
 
-// ---------------------- COMMIT ENDPOINTS ----------------------//
-
 /**
- * POST /lists/:id/items/commit
- *
- * Commits the item creation on the list that other instances verified. 
+ * PUT /lists/:id/commit
+ * { "list" : [list] }
+ * 
+ * Commits the updated list that other instances verified on top of the previous list. 
  * It also makes the list available after the change is made.
  * 
  */
-router.post('/:id/items/commit', (req, res) => {
+router.put('/:id/commit', (req, res) => {
     const listId = req.params.listId
-    const item = req.params.item
+    const updatedList = req.body.list
 
-    const modifiedList = listsService.addItem(listId, item)
+    const list = listService.updateAndUnlockList(listId, updatedList)
 
-    if (modifiedList) {
-        console.log("Successful commit: item created")
-        return res.status(200).json({ list: modifiedList })
+    if (list) {
+        console.log("Successful commit: list updated")
+        return res.status(200).json({ list: updatedList })
     } else {
-        return res.status(422).json({ message: "Couldn't commit the item creation." })
-    }
-});
-  
-/**
- * PUT /lists/:id/items/:index/commit
- *
- * Commits the item [index] modification on the list that other instances verified. 
- * It also makes the list available after the change is made.
- * 
- */
- router.put('/:id/items/:index/commit', (req, res) => {
-    const listId = req.params.id
-    const itemIndex = req.params.index
-    const item = req.body.item
-
-    const modifiedList = listsService.modifyItem(listId, itemIndex, item)
-
-    if (modifiedList) {
-        console.log("Successful commit: item modified")
-        return res.status(200).json({ list: modifiedList })
-    } else {
-        return res.status(422).json({ message: "Couldn't commit the item modification." })
-    }
-});
-
-/**
- * PATCH /lists/:id/items/:index/ready/commit?status=:status
- *
- * Commits the item [index] ready status [status] modification on the list that 
- * other instances verified. It also makes the list available after the change is made.
- * 
- */
-router.patch('/:id/items/:index/ready/commit', (req, res) => {
-    const listId = req.params.id
-    const itemIndex = req.params.index
-    const ready = req.query.status
-
-    const modifiedList = listsService.modifyItemReadyStatus(listId, itemIndex, ready)
-
-    if (modifiedList) {
-        console.log("Successful commit: item ready status modified")
-        return res.status(200).json({ list: modifiedList })
-    } else {
-        return res.status(422).json({ 
-            message: "Couldn't commit the item ready status modification." 
-        })
-    }
-})
-
-/**
- * PATCH /lists/:id/items/:index/position/commit
- *
- * Commits the item [index] position modification on the list that other instances verified. 
- * It also makes the list available after the change is made.
- * 
- */
-router.patch('/:id/items/:index/position/commit', (req, res) => {
-    const listId = req.params.id
-    const itemIndex = req.params.index
-    const newIndex = req.body.new_index
-
-    const modifiedList = listsService.modifyItemPosition(listId, itemIndex, newIndex)
-
-    if (modifiedList) {
-        console.log("Successful commit: item modified")
-        return res.status(200).json({ list: modifiedList })
-    } else {
-        return res.status(422).json({ 
-            message: "Couldn't commit the item position modification." 
-        })
-    }
-})
-
-/**
- * DELETE /lists/:id/items/:index/commit
- *  
- * Commits the item [index] deletion from the list that other instances verified. 
- * It also makes the list available after the change is made.
- * 
- */
- router.delete('/:id/items/:index/commit', (req, res) => {
-    const listId = req.params.id
-    const itemIndex = req.params.index
-
-    const modifiedList = listsService.deleteItem(listId, itemIndex)
-
-    if (modifiedList) {
-        console.log("Successful commit: item deleted")
-        return res.status(204).json({ list: modifiedList })
-    } else {
-        return res.status(422).json({  message: "Couldn't commit the item deletion." })
+        return res.status(422).json({ message: "Couldn't commit the updated list." })
     }
 });
 

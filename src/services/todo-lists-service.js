@@ -11,20 +11,30 @@ class TodoListsService {
         return listRepository.checkAndSetAvailability(id);
     }
 
+    updateList(id, list) {
+        return listRepository.updateList(id, list);
+    }
+
+    updateAndUnlockList(id, list) {
+        const list = listRepository.updateList(id, list);
+        listRepository.checkAndSetAvailability(id, true);
+        return list;
+    }
+
     addItem(id, item) {
         return listRepository.addItem(id, item);
     }
 
-    modifyItem(id, index, item) {
-        return listRepository.modifyItem(id, index, item);
+    updateItem(id, index, item) {
+        return listRepository.updateItem(id, index, item);
     }
 
-    modifyItemReadyStatus(id, index, ready) {
-        return listRepository.modifyItemReadyStatus(id, index, ready);
+    updateItemReadyStatus(id, index, ready) {
+        return listRepository.updateItemReadyStatus(id, index, ready);
     }
 
-    modifyItemPosition(id, index, newIndex) {
-        return listRepository.modifyItemPosition(id, index, newIndex);
+    updateItemPosition(id, index, newIndex) {
+        return listRepository.updateItemPosition(id, index, newIndex);
     }
 
     deleteItem(id, index) {
@@ -40,45 +50,98 @@ class TodoListsService {
 
     // ---------------------- COMMIT SERVICES ----------------------//
 
-    commitAddItem(listId, item) {
+    performAddItem(listId, item) {
         return this.performAction(listId, nodesToCommit => {
-            // We modify add the item locally
-            const modifiedList = this.addItem(listId, item);
-            // TODO: commit to the rest of the instances.
-            // TODO: Then we proceed to unlock the list.
-            // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
+            // We add the item locally
+            const updatedList = this.addItem(listId, item);
+
+            // Then we commit the change to the nodes that agreed with the new change
+            let committedListsToNodes = nodesToCommit.map(node => 
+                this.commitUpdatedList(node, listId, updatedList)
+            )
+
+            Promise.all(committedListsToNodes)
+                .then(_ => {
+                    // Lastly, we unlock the list locally and return the updated list
+                    listRepository.checkAndSetAvailability(listId, true);
+                    return { list: updatedList };
+                })
         })
     }
 
-    commitModifyItem(listId, index, item) {
+    performUpdateItem(listId, index, item) {
         return this.performAction(listId, nodesToCommit => {
-            // We modify the item locally
-            const modifiedList = this.modifyItem(listId, index, item);
-            // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
+            // We update the item locally
+            const updatedList = this.updateItem(listId, index, item);
+
+            // Then we commit the change to the nodes that agreed with the new change
+            let committedListsToNodes = nodesToCommit.map(node => 
+                this.commitUpdatedList(node, listId, updatedList)
+            )
+
+            Promise.all(committedListsToNodes)
+                .then(_ => {
+                    // Lastly, we unlock the list locally and return the updated list
+                    listRepository.checkAndSetAvailability(listId, true);
+                    return { list: updatedList };
+                })
         })
     }
 
-    commitModifyItemReadyStatus(listId, index, isReady) {
+    performUpdateItemReadyStatus(listId, index, isReady) {
         return this.performAction(listId, nodesToCommit => {
-            // We modify the item ready status locally
-            const modifiedList = this.modifyItemReadyStatus(listId, index, isReady);
-            // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
+            // We update the item ready status locally
+            const updatedList = this.updateItemReadyStatus(listId, index, isReady);
+
+            // Then we commit the change to the nodes that agreed with the new change
+            let committedListsToNodes = nodesToCommit.map(node => 
+                this.commitUpdatedList(node, listId, updatedList)
+            )
+
+            Promise.all(committedListsToNodes)
+                .then(_ => {
+                    // Lastly, we unlock the list locally and return the updated list
+                    listRepository.checkAndSetAvailability(listId, true);
+                    return { list: updatedList };
+                })
         })
     }
 
-    commitModifyItemPosition(listId, index, newIndex) {
+    performUpdateItemPosition(listId, index, newIndex) {
         return this.performAction(listId, nodesToCommit => {
-            // We modify the item position locally
-            const modifiedList = this.modifyItemPosition(listId, index, newIndex);
-            // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
+            // We update the item position locally
+            const updatedList = this.updateItemPosition(listId, index, newIndex);
+
+            // Then we commit the change to the nodes that agreed with the new change
+            let committedListsToNodes = nodesToCommit.map(node => 
+                this.commitUpdatedList(node, listId, updatedList)
+            )
+
+            Promise.all(committedListsToNodes)
+                .then(_ => {
+                    // Lastly, we unlock the list locally and return the updated list
+                    listRepository.checkAndSetAvailability(listId, true);
+                    return { list: updatedList };
+                })
         })
     }
 
-    commitDeleteItem(listId, index) {
+    performDeleteItem(listId, index) {
         return this.performAction(listId, nodesToCommit => {
             // We delete the item locally
-            const modifiedList = this.deleteItem(listId, index)
-            // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
+            const updatedList = this.deleteItem(listId, index);
+
+            // Then we commit the change to the nodes that agreed with the new change
+            let committedListsToNodes = nodesToCommit.map(node => 
+                this.commitUpdatedList(node, listId, updatedList)
+            )
+
+            Promise.all(committedListsToNodes)
+                .then(_ => {
+                    // Lastly, we unlock the list locally and return the updated list
+                    listRepository.checkAndSetAvailability(listId, true);
+                    return { list: updatedList };
+                })
         })
     }
 
@@ -92,7 +155,7 @@ class TodoListsService {
             else
                 return {
                     isOk: false,
-                    message: "Unable to modify list because is being modified by another user"
+                    message: "Unable to update list because is being modified by another user"
                 }
         })
     }
@@ -100,7 +163,7 @@ class TodoListsService {
     ok(list) {
         return {
             isOk: true,
-            list: [] // TODO: return the list with the action performed
+            list: list
         }
     }
 
@@ -137,8 +200,21 @@ class TodoListsService {
                 return {isAvailable: response.data.isAvailable, node: node}
             })
             .catch(error => {
-                Utils.log(`Error checking availability on node ${node} for list ${listId}`, error.response.data);
+                Utils.log(`Error checking availability on node ${node} for list ${listId}`, 
+                          error.response.data);
                 return {isAvailable: false, node: node} // TODO: Check if we want to retry.
+            })
+    }
+
+    commitUpdatedList(node, listId, updatedList) {
+        return axios.put(`${Utils.getUrlForPort(node)}/lists/${listId}/commit`)
+            .then(response => {
+                return {list: response.data.list, node: node}
+            })
+            .catch(error => {
+                Utils.log(`Error commiting updated list on node ${node} for list ${listId}`, 
+                          error.response.data);
+                return {list: null, node: node}
             })
     }
 }
