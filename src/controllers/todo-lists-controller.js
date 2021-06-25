@@ -97,7 +97,6 @@ router.patch('/:id/items/:index/position', (req, res) => {
 class TodoListsController {
     static handleResult(resultPromise, res) {
         resultPromise.then(result => {
-            console.log("RESULT AT CONTROLLER", result);
             if (result.isOk)
                 return res.json({list: result.list})
             else
