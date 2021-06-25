@@ -11,38 +11,73 @@ class TodoListsService {
         return listRepository.checkAndSetAvailability(id);
     }
 
-    createList(elements) {
+    addItem(id, item) {
+        return listRepository.addItem(id, item);
+    }
+
+    modifyItem(id, index, item) {
+        return listRepository.modifyItem(id, index, item);
+    }
+
+    modifyItemReadyStatus(id, index, ready) {
+        return listRepository.modifyItemReadyStatus(id, index, ready);
+    }
+
+    modifyItemPosition(id, index, newIndex) {
+        return listRepository.modifyItemPosition(id, index, newIndex);
+    }
+
+    deleteItem(id, index) {
+        return listRepository.deleteItem(id, index);
+    }
+
+    createList(items) {
         return this.performAction(null, _ => {
+            // TODO: Does this also call the commit action?
             // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
         })
     }
 
-    addItem(listId, item) {
+    // ---------------------- COMMIT SERVICES ----------------------//
+
+    commitAddItem(listId, item) {
         return this.performAction(listId, _ => {
+            // We modify add the item locally
+            const modifiedList = this.addItem(listId, item);
+            // TODO: commit to the rest of the instances.
+            // TODO: Then we proceed to unlock the list.
             // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
         })
     }
 
-    deleteItem(listId, index) {
+    commitModifyItem(listId, index, item) {
         return this.performAction(listId, _ => {
+            // We modify the item locally
+            const modifiedList = this.modifyItem(listId, index, item);
             // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
         })
     }
 
-    markItemReadiness(listId, index, isReady) {
+    commitModifyItemReadyStatus(listId, index, isReady) {
         return this.performAction(listId, _ => {
+            // We modify the item ready status locally
+            const modifiedList = this.modifyItemReadyStatus(listId, index, isReady);
             // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
         })
     }
 
-    modifyItem(listId, index, item) {
+    commitModifyItemPosition(listId, index, newIndex) {
         return this.performAction(listId, _ => {
+            // We modify the item position locally
+            const modifiedList = this.modifyItemPosition(listId, index, newIndex);
             // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
         })
     }
 
-    moveItem(listId, index, newIndex) {
+    commitDeleteItem(listId, index) {
         return this.performAction(listId, _ => {
+            // We delete the item locally
+            const modifiedList = this.deleteItem(listId, index)
             // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
         })
     }

@@ -7,13 +7,13 @@ const listsService = new ListsService()
 
 /**
  * POST /lists
- * { "elements": [] }
+ * { "items": [] }
  *
  * Creates a list.
  */
 router.post('/', (req, res) => {
-    const elements = req.body.elements
-    TodoListsController.handleResult(listsService.createList(elements), res)
+    const items = req.body.items
+    TodoListsController.handleResult(listsService.createList(items), res)
 })
 
 /**
@@ -36,7 +36,7 @@ router.patch('/:id/availability', (req, res) => {
 router.post('/:id/items', (req, res) => {
     const listId = req.params.id
     const item = req.body.item
-    TodoListsController.handleResult(listsService.addItem(listId, item), res)
+    TodoListsController.handleResult(listsService.commitAddItem(listId, item), res)
 })
 
 /**
@@ -49,7 +49,7 @@ router.put('/:id/items/:index', (req, res) => {
     const listId = req.params.id
     const itemIndex = req.params.index
     const item = req.body.item
-    TodoListsController.handleResult(listsService.modifyItem(listId, itemIndex, item), res)
+    TodoListsController.handleResult(listsService.commitModifyItem(listId, itemIndex, item), res)
 })
 
 /**
@@ -62,7 +62,9 @@ router.put('/:id/items/:index', (req, res) => {
     const listId = req.params.id
     const itemIndex = req.params.index
     const ready = req.query.status
-    TodoListsController.handleResult(listsService.markItemReadiness(listId, itemIndex, ready), res)
+    TodoListsController.handleResult(
+        listsService.commitModifyItemReadyStatus(listId, itemIndex, ready), res
+    )
 })
 
 /**
@@ -75,7 +77,9 @@ router.patch('/:id/items/:index/position', (req, res) => {
     const listId = req.params.id
     const itemIndex = req.params.index
     const newIndex = req.body.new_index
-    TodoListsController.handleResult(listsService.moveItem(listId, itemIndex, newIndex), res)
+    TodoListsController.handleResult(
+        listsService.commitModifyItemPosition(listId, itemIndex, newIndex), res
+    )
 })
 
 /**
@@ -86,7 +90,7 @@ router.patch('/:id/items/:index/position', (req, res) => {
  router.delete('/:id/items/:index', (req, res) => {
     const listId = req.params.id
     const itemIndex = req.params.index
-    TodoListsController.handleResult(listsService.deleteItem(listId, itemIndex), res)
+    TodoListsController.handleResult(listsService.commitDeleteItem(listId, itemIndex), res)
 })
 
 // ---------------------- COMMIT ENDPOINTS ----------------------//
@@ -98,18 +102,17 @@ router.patch('/:id/items/:index/position', (req, res) => {
  * It also makes the list available after the change is made.
  * 
  */
-
 router.post('/:id/items/commit', (req, res) => {
     const listId = req.params.listId
     const item = req.params.item
 
-    const newItem = todoListsItemsService.addItem(listId, itemValue)
+    const modifiedList = listsService.addItem(listId, item)
 
-    if (newItem) {
-        return res.status(201).json({status: "Successful commit: item created"})
+    if (modifiedList) {
+        console.log("Successful commit: item created")
+        return res.status(200).json({ list: modifiedList })
     } else {
-        // TODO: Handle this scenario?
-        return res.status(404).json({ message: "Couldn't commit the item creation." })
+        return res.status(422).json({ message: "Couldn't commit the item creation." })
     }
 });
   
@@ -120,22 +123,18 @@ router.post('/:id/items/commit', (req, res) => {
  * It also makes the list available after the change is made.
  * 
  */
-  
  router.put('/:id/items/:index/commit', (req, res) => {
     const listId = req.params.id
     const itemIndex = req.params.index
     const item = req.body.item
 
-    const item = todoListsItemsService.get(listId, itemIndex)
+    const modifiedList = listsService.modifyItem(listId, itemIndex, item)
 
-    if (item) {
-        todoListsItemsService.modifyItem(listId, itemIndex, item)
-        return res.status(201).json({status: "Successful commit: item modified"})
+    if (modifiedList) {
+        console.log("Successful commit: item modified")
+        return res.status(200).json({ list: modifiedList })
     } else {
-        // TODO: Handle this scenario?
-        return res.status(404).json({ 
-            message: "Couldn't commit the item modification because the resource does not exist." 
-        })
+        return res.status(422).json({ message: "Couldn't commit the item modification." })
     }
 });
 
@@ -146,21 +145,19 @@ router.post('/:id/items/commit', (req, res) => {
  * other instances verified. It also makes the list available after the change is made.
  * 
  */
-
 router.patch('/:id/items/:index/ready/commit', (req, res) => {
     const listId = req.params.id
     const itemIndex = req.params.index
     const ready = req.query.status
 
-    const item = todoListsItemsService.get(listId, itemIndex)
+    const modifiedList = listsService.modifyItemReadyStatus(listId, itemIndex, ready)
 
-    if (item) {
-        todoListsItemsService.modifyItemReadyStatus(listId, itemIndex, ready)
-        return res.status(201).json({status: "Successful commit: item modified"})
+    if (modifiedList) {
+        console.log("Successful commit: item ready status modified")
+        return res.status(200).json({ list: modifiedList })
     } else {
-        // TODO: Handle this scenario?
-        return res.status(404).json({ 
-            message: "Couldn't commit the item modification because the resource does not exist." 
+        return res.status(422).json({ 
+            message: "Couldn't commit the item ready status modification." 
         })
     }
 })
@@ -172,21 +169,19 @@ router.patch('/:id/items/:index/ready/commit', (req, res) => {
  * It also makes the list available after the change is made.
  * 
  */
-
 router.patch('/:id/items/:index/position/commit', (req, res) => {
     const listId = req.params.id
     const itemIndex = req.params.index
     const newIndex = req.body.new_index
 
-    const item = todoListsItemsService.get(listId, itemIndex)
+    const modifiedList = listsService.modifyItemPosition(listId, itemIndex, newIndex)
 
-    if (item) {
-        todoListsItemsService.modifyItemPosition(listId, itemIndex, newIndex)
-        return res.status(201).json({status: "Successful commit: item modified"})
+    if (modifiedList) {
+        console.log("Successful commit: item modified")
+        return res.status(200).json({ list: modifiedList })
     } else {
-        // TODO: Handle this scenario?
-        return res.status(404).json({ 
-            message: "Couldn't commit the item modification because the resource does not exist." 
+        return res.status(422).json({ 
+            message: "Couldn't commit the item position modification." 
         })
     }
 })
@@ -198,21 +193,17 @@ router.patch('/:id/items/:index/position/commit', (req, res) => {
  * It also makes the list available after the change is made.
  * 
  */
-
  router.delete('/:id/items/:index/commit', (req, res) => {
     const listId = req.params.id
     const itemIndex = req.params.index
 
-    const item = todoListsItemsService.get(listId, itemIndex)
+    const modifiedList = listsService.deleteItem(listId, itemIndex)
 
-    if (item) {
-        todoListsItemsService.deleteItem(listId, itemIndex)
-        return res.status(204).json({status: "Successful commit: item deleted"})
+    if (modifiedList) {
+        console.log("Successful commit: item deleted")
+        return res.status(204).json({ list: modifiedList })
     } else {
-        // TODO: Handle this scenario?
-        return res.status(404).json({ 
-            message: "Couldn't commit the item deletion because the resource does not exist." 
-        })
+        return res.status(422).json({  message: "Couldn't commit the item deletion." })
     }
 });
 
