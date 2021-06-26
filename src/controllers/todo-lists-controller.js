@@ -7,13 +7,21 @@ const listsService = new ListsService()
 
 /**
  * POST /lists
- * { "items": [] }
+ * { "list": [list] }
  *
  * Creates a list.
  */
 router.post('/', (req, res) => {
-    const items = req.body.items
-    TodoListsController.handleResult(listsService.createList(items), res)
+    const list = req.body.list
+    
+    result = listsService.performCreateList(list)
+
+    result.list.then(list => {
+        if(list) 
+            res.json({ list: list }) 
+        else
+            res.status(422).json({ message: "Couldn't create the list." })  
+    })
 })
 
 /**
@@ -91,6 +99,27 @@ router.patch('/:id/items/:index/position', (req, res) => {
     const itemIndex = req.params.index
     TodoListsController.handleResult(listsService.performDeleteItem(listId, itemIndex), res)
 })
+
+/**
+ * POST /lists/commit
+ * { "list" : [list] }
+ * 
+ * Commits the updated list that other instances verified on top of the previous list. 
+ * It also makes the list available after the change is made.
+ * 
+ */
+ router.post('/:id/commit', (req, res) => {
+    const newList = req.body.list
+
+    const list = listsService.createList(newList)
+
+    if (list) {
+        console.log("Successful commit: list created")
+        return res.status(200).json({ list: createdList })
+    } else {
+        return res.status(422).json({ message: "Couldn't commit the created list." })
+    }
+});
 
 /**
  * PUT /lists/:id/commit

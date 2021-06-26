@@ -5,8 +5,8 @@ class TodoListRepository {
         this.lists = elements
     }
 
-    addList(element) {
-        this.lists.push(element)
+    createList(list) {
+        this.lists.push(list)
     }
 
     updateList(id, list) {

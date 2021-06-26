@@ -7,8 +7,14 @@ const Utils = require('../utils');
 
 class TodoListsService {
 
+    // ---------------------- REPOSITORY SERVICES ----------------------//
+
     checkAndSetAvailability(id) {
         return listRepository.checkAndSetAvailability(id);
+    }
+
+    createList(list) {
+        listRepository.createList(list);
     }
 
     updateAndUnlockList(id, list) {
@@ -37,14 +43,19 @@ class TodoListsService {
         return listRepository.deleteItem(id, index);
     }
 
-    createList(items) {
-        return this.performAction(null, nodesToCommit => {
-            // TODO: Does this also call the commit action? Es un commit sin quorum
-            // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
-        })
-    }
-
     // ---------------------- COMMIT SERVICES ----------------------//
+
+    performCreateList(newList) {
+        // For the list creation we make a commit without quorum.
+
+        createdList = createList(newList);
+        nodes = nodesService.getAllButSelf();
+
+        // We give a null listId because we are creating it.
+        list = commitToNodes(nodes, null, createdList);
+
+        return this.ok(list);
+    }
 
     performAddItem(listId, item) {
         return this.performAction(listId, nodesToCommit => {
@@ -90,18 +101,9 @@ class TodoListsService {
                 // Apply the action to the list locally
                 updatedList = action()
 
-                // After we updated the local list, we commit the change to the nodes that agreed with the new change
-                let committedListsToNodes = quorumAvailability.nodesSaidYes.map(node => 
-                    this.commitUpdatedList(node, listId, updatedList)
-                )
-
-                let list = Promise.all(committedListsToNodes)
-                    .then(_ => {
-                        // Lastly, we unlock the list locally and return the updated list
-                        listRepository.checkAndSetAvailability(listId, true);
-                        return { list: updatedList };
-                    })
-                    .catch(_ => { return { list: updatedList }; })
+                // After we updated the local list, we commit the change to the nodes that agreed 
+                // with the new change. Also, we unlock the list locally.
+                list = commitToNodes(quorumAvailability.nodesSaidYes, id, updatedList)
 
                 return this.ok(list)
             }
@@ -111,6 +113,18 @@ class TodoListsService {
                     message: "Unable to update list because is being modified by another user"
                 }
         })
+    }
+
+    commitToNodes(nodes, id, list) {
+        let committedListsToNodes = nodes.map(node => this.commitUpdatedList(node, id, list))
+
+        return Promise.all(committedListsToNodes)
+            .then(_ => {
+                // We unlock the list locally and return the updated list
+                listRepository.checkAndSetAvailability(id, true);
+                return { list: list };
+            })
+            .catch(_ => { return { list: list }; })
     }
 
     ok(list) {
@@ -160,13 +174,24 @@ class TodoListsService {
     }
 
     commitUpdatedList(node, listId, updatedList) {
-        return axios.put(`${Utils.getUrlForPort(node)}/lists/${listId}/commit`)
+        // If the listId is present, then we update a current list, if not, then we create it.
+        if(listId) {
+            return axios.put(`${Utils.getUrlForPort(node)}/lists/${listId}/commit`)
+                .then(response => {
+                    return {list: response.data.list, node: node}
+                })
+                .catch(error => {
+                    Utils.log(`Error commiting updated list on node ${node} for list ${listId}`, 
+                            error.response.data);
+                    return {list: null, node: node}
+                })
+        }
+        return axios.post(`${Utils.getUrlForPort(node)}/lists/commit`)
             .then(response => {
                 return {list: response.data.list, node: node}
             })
             .catch(error => {
-                Utils.log(`Error commiting updated list on node ${node} for list ${listId}`, 
-                          error.response.data);
+                Utils.log(`Error commiting the list creation on node ${node}`, error.response.data);
                 return {list: null, node: node}
             })
     }
