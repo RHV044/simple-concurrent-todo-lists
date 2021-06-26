@@ -14,7 +14,7 @@ class TodoListsService {
     }
 
     createList(list) {
-        listRepository.createList(list);
+        return listRepository.createList(list);
     }
 
     updateAndUnlockList(id, list) {
@@ -48,11 +48,11 @@ class TodoListsService {
     performCreateList(newList) {
         // For the list creation we make a commit without quorum.
 
-        createdList = createList(newList);
-        nodes = nodesService.getAllButSelf();
+        let createdList = this.createList(newList);
+        let nodes = nodesService.getAllButSelf();
 
         // We give a null listId because we are creating it.
-        list = commitToNodes(nodes, null, createdList);
+        let list = this.commitToNodes(nodes, null, createdList);
 
         return this.ok(list);
     }
@@ -99,11 +99,11 @@ class TodoListsService {
         return this.checkAvailability(id).then(quorumAvailability => {
             if (quorumAvailability.hasQuorum) {
                 // Apply the action to the list locally
-                updatedList = action()
+                let updatedList = action()
 
                 // After we updated the local list, we commit the change to the nodes that agreed 
                 // with the new change. Also, we unlock the list locally.
-                list = commitToNodes(quorumAvailability.nodesSaidYes, id, updatedList)
+                let list = this.commitToNodes(quorumAvailability.nodesSaidYes, id, updatedList)
 
                 return this.ok(list)
             }

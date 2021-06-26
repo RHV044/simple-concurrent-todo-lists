@@ -18,7 +18,7 @@ router.post('/', (req, res) => {
 
     result.list.then(list => {
         if(list) 
-            res.json({ list: list }) 
+            res.json(list) 
         else
             res.status(422).json({ message: "Couldn't create the list." })  
     })
@@ -108,14 +108,14 @@ router.patch('/:id/items/:index/position', (req, res) => {
  * It also makes the list available after the change is made.
  * 
  */
- router.post('/:id/commit', (req, res) => {
+ router.post('/commit', (req, res) => {
     const newList = req.body.list
 
     const list = listsService.createList(newList)
 
     if (list) {
         console.log("Successful commit: list created")
-        return res.status(200).json({ list: createdList })
+        return res.status(200).json({ list: list })
     } else {
         return res.status(422).json({ message: "Couldn't commit the created list." })
     }
