@@ -11,14 +11,10 @@ class TodoListsService {
         return listRepository.checkAndSetAvailability(id);
     }
 
-    updateList(id, list) {
-        return listRepository.updateList(id, list);
-    }
-
     updateAndUnlockList(id, list) {
-        const list = listRepository.updateList(id, list);
+        let updatedList = listRepository.updateList(id, list);
         listRepository.checkAndSetAvailability(id, true);
-        return list;
+        return updatedList;
     }
 
     addItem(id, item) {
@@ -43,7 +39,7 @@ class TodoListsService {
 
     createList(items) {
         return this.performAction(null, nodesToCommit => {
-            // TODO: Does this also call the commit action?
+            // TODO: Does this also call the commit action? Es un commit sin quorum
             // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
         })
     }
@@ -53,105 +49,62 @@ class TodoListsService {
     performAddItem(listId, item) {
         return this.performAction(listId, nodesToCommit => {
             // We add the item locally
-            const updatedList = this.addItem(listId, item);
-
-            // Then we commit the change to the nodes that agreed with the new change
-            let committedListsToNodes = nodesToCommit.map(node => 
-                this.commitUpdatedList(node, listId, updatedList)
-            )
-
-            Promise.all(committedListsToNodes)
-                .then(_ => {
-                    // Lastly, we unlock the list locally and return the updated list
-                    listRepository.checkAndSetAvailability(listId, true);
-                    return { list: updatedList };
-                })
+            return this.addItem(listId, item);
         })
     }
 
     performUpdateItem(listId, index, item) {
         return this.performAction(listId, nodesToCommit => {
             // We update the item locally
-            const updatedList = this.updateItem(listId, index, item);
-
-            // Then we commit the change to the nodes that agreed with the new change
-            let committedListsToNodes = nodesToCommit.map(node => 
-                this.commitUpdatedList(node, listId, updatedList)
-            )
-
-            Promise.all(committedListsToNodes)
-                .then(_ => {
-                    // Lastly, we unlock the list locally and return the updated list
-                    listRepository.checkAndSetAvailability(listId, true);
-                    return { list: updatedList };
-                })
+            return this.updateItem(listId, index, item);
         })
     }
 
     performUpdateItemReadyStatus(listId, index, isReady) {
         return this.performAction(listId, nodesToCommit => {
             // We update the item ready status locally
-            const updatedList = this.updateItemReadyStatus(listId, index, isReady);
-
-            // Then we commit the change to the nodes that agreed with the new change
-            let committedListsToNodes = nodesToCommit.map(node => 
-                this.commitUpdatedList(node, listId, updatedList)
-            )
-
-            Promise.all(committedListsToNodes)
-                .then(_ => {
-                    // Lastly, we unlock the list locally and return the updated list
-                    listRepository.checkAndSetAvailability(listId, true);
-                    return { list: updatedList };
-                })
+            return this.updateItemReadyStatus(listId, index, isReady);
         })
     }
 
     performUpdateItemPosition(listId, index, newIndex) {
         return this.performAction(listId, nodesToCommit => {
             // We update the item position locally
-            const updatedList = this.updateItemPosition(listId, index, newIndex);
-
-            // Then we commit the change to the nodes that agreed with the new change
-            let committedListsToNodes = nodesToCommit.map(node => 
-                this.commitUpdatedList(node, listId, updatedList)
-            )
-
-            Promise.all(committedListsToNodes)
-                .then(_ => {
-                    // Lastly, we unlock the list locally and return the updated list
-                    listRepository.checkAndSetAvailability(listId, true);
-                    return { list: updatedList };
-                })
+            return this.updateItemPosition(listId, index, newIndex);
         })
     }
 
     performDeleteItem(listId, index) {
-        return this.performAction(listId, nodesToCommit => {
+        return this.performAction(listId, _ => {
             // We delete the item locally
-            const updatedList = this.deleteItem(listId, index);
-
-            // Then we commit the change to the nodes that agreed with the new change
-            let committedListsToNodes = nodesToCommit.map(node => 
-                this.commitUpdatedList(node, listId, updatedList)
-            )
-
-            Promise.all(committedListsToNodes)
-                .then(_ => {
-                    // Lastly, we unlock the list locally and return the updated list
-                    listRepository.checkAndSetAvailability(listId, true);
-                    return { list: updatedList };
-                })
+            return this.deleteItem(listId, index);
         })
     }
 
     performAction(id, action) {
+        // If the id is null, it means it is a creation and there is no need to check for availability.
         if (id == null) return Promise.resolve(this.ok(action(nodesService.getAllButSelf())));
-        // if id == null that means it is a creation and there is no need to check for availability.
 
         return this.checkAvailability(id).then(quorumAvailability => {
-            if (quorumAvailability.hasQuorum)
-                return this.ok(action(quorumAvailability.nodesSaidYes))
+            if (quorumAvailability.hasQuorum) {
+                // Apply the action to the list locally
+                updatedList = action()
+
+                // After we updated the local list, we commit the change to the nodes that agreed with the new change
+                let committedListsToNodes = quorumAvailability.nodesSaidYes.map(node => 
+                    this.commitUpdatedList(node, listId, updatedList)
+                )
+
+                let list = Promise.all(committedListsToNodes)
+                    .then(_ => {
+                        // Lastly, we unlock the list locally and return the updated list
+                        listRepository.checkAndSetAvailability(listId, true);
+                        return { list: updatedList };
+                    })
+                    .catch(_ => { return { list: updatedList }; })
+
+                return this.ok(list)
+            }
             else
                 return {
                     isOk: false,

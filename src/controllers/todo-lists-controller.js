@@ -104,7 +104,7 @@ router.put('/:id/commit', (req, res) => {
     const listId = req.params.listId
     const updatedList = req.body.list
 
-    const list = listService.updateAndUnlockList(listId, updatedList)
+    const list = listsService.updateAndUnlockList(listId, updatedList)
 
     if (list) {
         console.log("Successful commit: list updated")
@@ -118,9 +118,9 @@ class TodoListsController {
     static handleResult(resultPromise, res) {
         resultPromise.then(result => {
             if (result.isOk)
-                return res.json({list: result.list})
+                result.list.then(list => { res.json({ list: list }) })
             else
-                return res.status(409).json({message: result.message})
+                res.status(409).json({ message: result.message })
         })
     }
 }

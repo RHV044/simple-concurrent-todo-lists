@@ -36,7 +36,8 @@ class TodoListRepository {
     /** Checks whether the list is blocked or not and blocks/unblocks it.
      * Returns true if the list was available. */
     checkAndSetAvailability(id, availability = false) {
-        // TODO
+        // TODO: Check and set availability
+        // return availability?
         return true;
     }
 }
