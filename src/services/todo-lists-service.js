@@ -49,7 +49,7 @@ class TodoListsService {
 
     performAction(id, action) {
         if (id == null) return Promise.resolve(this.ok(action(nodesService.getAllButSelf())));
-        // if id == null that means it is a creation and there is no need to check for availability.
+        // if id == null that means it is a list creation and there is no need to check for availability.
 
         return this.checkAvailability(id).then(quorumAvailability => {
             if (quorumAvailability.hasQuorum)
