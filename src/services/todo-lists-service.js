@@ -18,9 +18,8 @@ class TodoListsService {
     }
 
     updateAndUnlockList(id, list) {
-        let updatedList = listRepository.updateList(id, list);
+        listRepository.updateList(id, list);
         listRepository.checkAndSetAvailability(id, true);
-        return updatedList;
     }
 
     addItem(id, item) {

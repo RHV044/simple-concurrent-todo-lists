@@ -19,7 +19,7 @@ const listsService = new ListsService()
 router.post('/', (req, res) => {
     const list = req.body.list
 
-    result = listsService.performCreateList(list)
+    const result = listsService.performCreateList(list)
 
     result.list.then(list => {
         if (list)
@@ -141,14 +141,9 @@ router.put('/:id/commit', (req, res) => {
     const listId = req.params.id
     const updatedList = req.body.list
 
-    const list = listsService.updateAndUnlockList(listId, updatedList)
-
-    if (list) {
-        console.log("Successful commit: list updated")
-        res.status(204)
-    } else {
-        res.status(422).json({message: "Couldn't commit the updated list."})
-    }
+    listsService.updateAndUnlockList(listId, updatedList)
+    console.log("Successful commit: list updated")
+    res.status(204)
 });
 
 class TodoListsController {
