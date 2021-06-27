@@ -65,21 +65,21 @@ class TodoListsService {
     }
 
     performUpdateItem(listId, index, item) {
-        return this.performAction(listId, nodesToCommit => {
+        return this.performAction(listId, _ => {
             // We update the item locally
             return this.updateItem(listId, index, item);
         })
     }
 
     performUpdateItemReadyStatus(listId, index, isReady) {
-        return this.performAction(listId, nodesToCommit => {
+        return this.performAction(listId, _ => {
             // We update the item ready status locally
             return this.updateItemReadyStatus(listId, index, isReady);
         })
     }
 
     performUpdateItemPosition(listId, index, newIndex) {
-        return this.performAction(listId, nodesToCommit => {
+        return this.performAction(listId, _ => {
             // We update the item position locally
             return this.updateItemPosition(listId, index, newIndex);
         })
@@ -173,10 +173,10 @@ class TodoListsService {
             })
     }
 
-    commitUpdatedList(node, listId, updatedList) {
+    commitUpdatedList(node, listId, list) {
         // If the listId is present, then we update a current list, if not, then we create it.
         if(listId) {
-            return axios.put(`${Utils.getUrlForPort(node)}/lists/${listId}/commit`)
+            return axios.put(`${Utils.getUrlForPort(node)}/lists/${listId}/commit`, { list: list })
                 .then(response => {
                     return {list: response.data.list, node: node}
                 })
@@ -186,7 +186,7 @@ class TodoListsService {
                     return {list: null, node: node}
                 })
         }
-        return axios.post(`${Utils.getUrlForPort(node)}/lists/commit`)
+        return axios.post(`${Utils.getUrlForPort(node)}/lists/commit`, { list: list })
             .then(response => {
                 return {list: response.data.list, node: node}
             })
