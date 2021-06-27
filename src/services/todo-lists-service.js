@@ -164,12 +164,12 @@ class TodoListsService {
     askAvailability(node, listId) {
         return axios.patch(`${Utils.getUrlForPort(node)}/lists/${listId}/availability`)
             .then(response => {
-                return {isAvailable: response.data.isAvailable, node: node}
+                return { isAvailable: response.data.isAvailable, node: node }
             })
             .catch(error => {
                 Utils.log(`Error checking availability on node ${node} for list ${listId}`, 
                           error.response.data);
-                return {isAvailable: false, node: node} // TODO: Check if we want to retry.
+                return { isAvailable: false, node: node } // TODO: Check if we want to retry.
             })
     }
 
@@ -177,22 +177,14 @@ class TodoListsService {
         // If the listId is present, then we update a current list, if not, then we create it.
         if(listId) {
             return axios.put(`${Utils.getUrlForPort(node)}/lists/${listId}/commit`, { list: list })
-                .then(response => {
-                    return {list: response.data.list, node: node}
-                })
                 .catch(error => {
                     Utils.log(`Error commiting updated list on node ${node} for list ${listId}`, 
                             error.response.data);
-                    return {list: null, node: node}
                 })
         }
         return axios.post(`${Utils.getUrlForPort(node)}/lists/commit`, { list: list })
-            .then(response => {
-                return {list: response.data.list, node: node}
-            })
             .catch(error => {
                 Utils.log(`Error commiting the list creation on node ${node}`, error.response.data);
-                return {list: null, node: node}
             })
     }
 }
