@@ -61,7 +61,7 @@ class TodoListRepository {
     }
 
     findList(id) {
-        return this.lists.find(todoList => todoList.id === id)
+        return this.lists.find(todoList => todoList.id == id)
     }
 }
 
