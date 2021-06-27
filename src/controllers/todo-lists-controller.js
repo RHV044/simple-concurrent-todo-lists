@@ -129,7 +129,7 @@ router.patch('/:id/items/:index/position', (req, res) => {
  * 
  */
 router.put('/:id/commit', (req, res) => {
-    const listId = req.params.listId
+    const listId = req.params.id
     const updatedList = req.body.list
 
     const list = listsService.updateAndUnlockList(listId, updatedList)
