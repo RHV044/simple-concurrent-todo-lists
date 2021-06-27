@@ -27,12 +27,12 @@ class TodoListsService {
         return listRepository.addItem(id, item);
     }
 
-    updateItem(id, index, item) {
-        return listRepository.updateItem(id, index, item);
+    updateItemText(id, index, text) {
+        return listRepository.updateItemText(id, index, text);
     }
 
-    updateItemReadyStatus(id, index, ready) {
-        return listRepository.updateItemReadyStatus(id, index, ready);
+    updateItemDoneStatus(id, index, ready) {
+        return listRepository.updateItemDoneStatus(id, index, ready);
     }
 
     updateItemPosition(id, index, newIndex) {
@@ -51,7 +51,6 @@ class TodoListsService {
         let createdList = this.createList(newList);
         let nodes = nodesService.getAllButSelf();
 
-        // We give a null listId because we are creating it.
         let list = this.commitToNodes(nodes, null, createdList);
 
         return this.ok(list);
@@ -64,17 +63,17 @@ class TodoListsService {
         })
     }
 
-    performUpdateItem(listId, index, item) {
+    performUpdateItem(listId, index, text) {
         return this.performAction(listId, nodesToCommit => {
-            // We update the item locally
-            return this.updateItem(listId, index, item);
+            // We update the text locally
+            return this.updateItemText(listId, index, text);
         })
     }
 
-    performUpdateItemReadyStatus(listId, index, isReady) {
+    performUpdateItemDoneStatus(listId, index, isDone) {
         return this.performAction(listId, nodesToCommit => {
             // We update the item ready status locally
-            return this.updateItemReadyStatus(listId, index, isReady);
+            return this.updateItemDoneStatus(listId, index, isDone);
         })
     }
 
