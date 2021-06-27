@@ -113,7 +113,7 @@ router.patch('/:id/items/:index/position', (req, res) => {
 
     if (list) {
         console.log("Successful commit: list created")
-        res.status(204)
+        res.status(204).send()
     } else {
         res.status(422).json({ message: "Couldn't commit the created list." })
     }
@@ -135,7 +135,7 @@ router.put('/:id/commit', (req, res) => {
 
     if (list) {
         console.log("Successful commit: list updated")
-        res.status(204)
+        res.status(204).send()
     } else {
         res.status(422).json({ message: "Couldn't commit the updated list." })
     }

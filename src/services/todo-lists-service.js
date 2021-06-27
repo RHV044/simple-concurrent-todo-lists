@@ -121,10 +121,10 @@ class TodoListsService {
         return Promise.all(committedListsToNodes)
             .then(_ => {
                 // We unlock the list locally and return the updated list
-                listRepository.checkAndSetAvailability(id, true);
-                return { list: list };
+                if (id) listRepository.checkAndSetAvailability(id, true);
+                return list;
             })
-            .catch(_ => { return { list: list }; })
+            .catch(_ => { return list })
     }
 
     ok(list) {
