@@ -58,7 +58,7 @@ class TodoListsService {
     }
 
     performAddItem(listId, item) {
-        return this.performAction(listId, nodesToCommit => {
+        return this.performAction(listId, _ => {
             // We add the item locally
             return this.addItem(listId, item);
         })
