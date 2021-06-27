@@ -7,65 +7,130 @@ const Utils = require('../utils');
 
 class TodoListsService {
 
+    // ---------------------- REPOSITORY SERVICES ----------------------//
+
     checkAndSetAvailability(id) {
         return listRepository.checkAndSetAvailability(id);
     }
 
-    createList(elements) {
-        return this.performAction(null, nodesToCommit => {
-            // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
+    createList(list) {
+        return listRepository.createList(list);
+    }
+
+    updateAndUnlockList(id, list) {
+        let updatedList = listRepository.updateList(id, list);
+        listRepository.checkAndSetAvailability(id, true);
+        return updatedList;
+    }
+
+    addItem(id, item) {
+        return listRepository.addItem(id, item);
+    }
+
+    updateItem(id, index, item) {
+        return listRepository.updateItem(id, index, item);
+    }
+
+    updateItemReadyStatus(id, index, ready) {
+        return listRepository.updateItemReadyStatus(id, index, ready);
+    }
+
+    updateItemPosition(id, index, newIndex) {
+        return listRepository.updateItemPosition(id, index, newIndex);
+    }
+
+    deleteItem(id, index) {
+        return listRepository.deleteItem(id, index);
+    }
+
+    // ---------------------- COMMIT SERVICES ----------------------//
+
+    performCreateList(newList) {
+        // For the list creation we make a commit without quorum.
+
+        let createdList = this.createList(newList);
+        let nodes = nodesService.getAllButSelf();
+
+        // We give a null listId to call the list creation endpoint.
+        let list = this.commitToNodes(nodes, null, createdList);
+
+        return this.ok(list);
+    }
+
+    performAddItem(listId, item) {
+        return this.performAction(listId, _ => {
+            // We add the item locally
+            return this.addItem(listId, item);
         })
     }
 
-    addElement(listId, element) {
-        return this.performAction(listId, nodesToCommit => {
-            // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
+    performUpdateItem(listId, index, item) {
+        return this.performAction(listId, _ => {
+            // We update the item locally
+            return this.updateItem(listId, index, item);
         })
     }
 
-    deleteElement(listId, index) {
-        return this.performAction(listId, nodesToCommit => {
-            // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
+    performUpdateItemReadyStatus(listId, index, isReady) {
+        return this.performAction(listId, _ => {
+            // We update the item ready status locally
+            return this.updateItemReadyStatus(listId, index, isReady);
         })
     }
 
-    markReadiness(listId, index, isReady) {
-        return this.performAction(listId, nodesToCommit => {
-            // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
+    performUpdateItemPosition(listId, index, newIndex) {
+        return this.performAction(listId, _ => {
+            // We update the item position locally
+            return this.updateItemPosition(listId, index, newIndex);
         })
     }
 
-    modifyElement(listId, index, item) {
-        return this.performAction(listId, nodesToCommit => {
-            // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
-        })
-    }
-
-    moveElement(listId, index, newIndex) {
-        return this.performAction(listId, nodesToCommit => {
-            // TODO HERE WE NEED TO MAKE THE CALL TO THE OTHER NODES AND RETURN THE LIST WITH THE APPLIED CHANGES
+    performDeleteItem(listId, index) {
+        return this.performAction(listId, _ => {
+            // We delete the item locally
+            return this.deleteItem(listId, index);
         })
     }
 
     performAction(id, action) {
+        // If the id is null, it means it is a creation and there is no need to check for availability.
         if (id == null) return Promise.resolve(this.ok(action(nodesService.getAllButSelf())));
-        // if id == null that means it is a list creation and there is no need to check for availability.
 
         return this.checkAvailability(id).then(quorumAvailability => {
-            if (quorumAvailability.hasQuorum)
-                return this.ok(action(quorumAvailability.nodesSaidYes))
+            if (quorumAvailability.hasQuorum) {
+                // Apply the action to the list locally
+                let updatedList = action()
+
+                // After we updated the local list, we commit the change to the nodes that agreed 
+                // with the new change. Also, we unlock the list locally.
+                let list = this.commitToNodes(quorumAvailability.nodesSaidYes, id, updatedList)
+
+                return this.ok(list)
+            }
             else
                 return {
                     isOk: false,
-                    message: "Unable to modify list because is being modified by another user"
+                    message: "Unable to update list because is being modified by another user"
                 }
         })
+    }
+
+    commitToNodes(nodes, id, list) {
+        let committedListsToNodes = nodes.map(node => this.commitList(node, id, list))
+
+        return Promise.all(committedListsToNodes)
+            .then(_ => {
+                // We unlock the list locally and return the updated list
+                if (id) listRepository.checkAndSetAvailability(id, true);
+                return list;
+            })
+            .catch(_ => { return list })
     }
 
     ok(list) {
         return {
             isOk: true,
-            list: [] // TODO: return the list with the action performed
+            list: list
         }
     }
 
@@ -99,11 +164,27 @@ class TodoListsService {
     askAvailability(node, listId) {
         return axios.patch(`${Utils.getUrlForPort(node)}/lists/${listId}/availability`)
             .then(response => {
-                return {isAvailable: response.data.isAvailable, node: node}
+                return { isAvailable: response.data.isAvailable, node: node }
             })
             .catch(error => {
-                Utils.log(`Error checking availability on node ${node} for list ${listId}`, error.response.data);
-                return {isAvailable: false, node: node} // TODO: Check if we want to retry.
+                Utils.log(`Error checking availability on node ${node} for list ${listId}`, 
+                          error.response.data);
+                return { isAvailable: false, node: node } // TODO: Check if we want to retry.
+            })
+    }
+
+    commitList(node, listId, list) {
+        // If the listId is present, then we update a current list, if not, then we create it.
+        if(listId) {
+            return axios.put(`${Utils.getUrlForPort(node)}/lists/${listId}/commit`, { list: list })
+                .catch(error => {
+                    Utils.log(`Error commiting updated list on node ${node} for list ${listId}`, 
+                            error.response.data);
+                })
+        }
+        return axios.post(`${Utils.getUrlForPort(node)}/lists/commit`, { list: list })
+            .catch(error => {
+                Utils.log(`Error commiting the list creation on node ${node}`, error.response.data);
             })
     }
 }
