@@ -23,7 +23,7 @@ router.post('/', (req, res) => {
 
     result.list.then(list => {
         if (list)
-            res.json(list)
+            res.status(201).json(list)
         else
             res.status(422).json({message: "Couldn't create the list."})
     })
@@ -71,7 +71,6 @@ router.put('/:id/items/:index', (req, res) => {
 
 /**
  * PATCH /lists/:id/items/:index/done?status=:status
- * { "status": true }
  *
  * Changes the item [index] done status from the list as [status].
  */
@@ -114,8 +113,7 @@ router.delete('/:id/items/:index', (req, res) => {
  * POST /lists/commit
  * { "list" : [list] }
  *
- * Commits the updated list that other instances verified on top of the previous list.
- * It also makes the list available after the change is made.
+ * Commits the created list to the other instances.
  *
  */
 router.post('/commit', (req, res) => {
@@ -125,9 +123,9 @@ router.post('/commit', (req, res) => {
 
     if (list) {
         console.log("Successful commit: list created")
-        return res.status(200).json({list: list})
+        res.status(204)
     } else {
-        return res.status(422).json({message: "Couldn't commit the created list."})
+        res.status(422).json({message: "Couldn't commit the created list."})
     }
 });
 
@@ -140,16 +138,16 @@ router.post('/commit', (req, res) => {
  *
  */
 router.put('/:id/commit', (req, res) => {
-    const listId = req.params.listId
+    const listId = req.params.id
     const updatedList = req.body.list
 
     const list = listsService.updateAndUnlockList(listId, updatedList)
 
     if (list) {
         console.log("Successful commit: list updated")
-        return res.status(200).json({list: updatedList})
+        res.status(204)
     } else {
-        return res.status(422).json({message: "Couldn't commit the updated list."})
+        res.status(422).json({message: "Couldn't commit the updated list."})
     }
 });
 

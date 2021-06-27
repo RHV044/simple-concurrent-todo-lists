@@ -51,34 +51,35 @@ class TodoListsService {
         let createdList = this.createList(newList);
         let nodes = nodesService.getAllButSelf();
 
+        // We give a null listId to call the list creation endpoint.
         let list = this.commitToNodes(nodes, null, createdList);
 
         return this.ok(list);
     }
 
     performAddItem(listId, item) {
-        return this.performAction(listId, nodesToCommit => {
+        return this.performAction(listId, _ => {
             // We add the item locally
             return this.addItem(listId, item);
         })
     }
 
     performUpdateItem(listId, index, text) {
-        return this.performAction(listId, nodesToCommit => {
+        return this.performAction(listId, _ => {
             // We update the text locally
             return this.updateItemText(listId, index, text);
         })
     }
 
     performUpdateItemDoneStatus(listId, index, isDone) {
-        return this.performAction(listId, nodesToCommit => {
+        return this.performAction(listId, _ => {
             // We update the item ready status locally
             return this.updateItemDoneStatus(listId, index, isDone);
         })
     }
 
     performUpdateItemPosition(listId, index, newIndex) {
-        return this.performAction(listId, nodesToCommit => {
+        return this.performAction(listId, _ => {
             // We update the item position locally
             return this.updateItemPosition(listId, index, newIndex);
         })
@@ -115,7 +116,7 @@ class TodoListsService {
     }
 
     commitToNodes(nodes, id, list) {
-        let committedListsToNodes = nodes.map(node => this.commitUpdatedList(node, id, list))
+        let committedListsToNodes = nodes.map(node => this.commitList(node, id, list))
 
         return Promise.all(committedListsToNodes)
             .then(_ => {
@@ -163,35 +164,27 @@ class TodoListsService {
     askAvailability(node, listId) {
         return axios.patch(`${Utils.getUrlForPort(node)}/lists/${listId}/availability`)
             .then(response => {
-                return {isAvailable: response.data.isAvailable, node: node}
+                return { isAvailable: response.data.isAvailable, node: node }
             })
             .catch(error => {
                 Utils.log(`Error checking availability on node ${node} for list ${listId}`, 
                           error.response.data);
-                return {isAvailable: false, node: node} // TODO: Check if we want to retry.
+                return { isAvailable: false, node: node } // TODO: Check if we want to retry.
             })
     }
 
-    commitUpdatedList(node, listId, updatedList) {
+    commitList(node, listId, list) {
         // If the listId is present, then we update a current list, if not, then we create it.
         if(listId) {
-            return axios.put(`${Utils.getUrlForPort(node)}/lists/${listId}/commit`)
-                .then(response => {
-                    return {list: response.data.list, node: node}
-                })
+            return axios.put(`${Utils.getUrlForPort(node)}/lists/${listId}/commit`, { list: list })
                 .catch(error => {
                     Utils.log(`Error commiting updated list on node ${node} for list ${listId}`, 
                             error.response.data);
-                    return {list: null, node: node}
                 })
         }
-        return axios.post(`${Utils.getUrlForPort(node)}/lists/commit`)
-            .then(response => {
-                return {list: response.data.list, node: node}
-            })
+        return axios.post(`${Utils.getUrlForPort(node)}/lists/commit`, { list: list })
             .catch(error => {
                 Utils.log(`Error commiting the list creation on node ${node}`, error.response.data);
-                return {list: null, node: node}
             })
     }
 }
