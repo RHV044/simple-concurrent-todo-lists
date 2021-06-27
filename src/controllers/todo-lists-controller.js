@@ -61,7 +61,6 @@ router.put('/:id/items/:index', (req, res) => {
 
 /**
  * PATCH /lists/:id/items/:index/ready?status=:status
- * { "status": true }
  *
  * Changes the item [index] ready status from the list as [status].
  */
@@ -114,7 +113,7 @@ router.patch('/:id/items/:index/position', (req, res) => {
 
     if (list) {
         console.log("Successful commit: list created")
-        return res.status(200).json({ list: list })
+        res.json({ list: list })
     } else {
         return res.status(422).json({ message: "Couldn't commit the created list." })
     }
@@ -129,7 +128,7 @@ router.patch('/:id/items/:index/position', (req, res) => {
  * 
  */
 router.put('/:id/commit', (req, res) => {
-    const listId = req.params.listId
+    const listId = req.params.id
     const updatedList = req.body.list
 
     const list = listsService.updateAndUnlockList(listId, updatedList)
