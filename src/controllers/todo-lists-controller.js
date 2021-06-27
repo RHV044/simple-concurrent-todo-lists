@@ -61,7 +61,6 @@ router.put('/:id/items/:index', (req, res) => {
 
 /**
  * PATCH /lists/:id/items/:index/ready?status=:status
- * { "status": true }
  *
  * Changes the item [index] ready status from the list as [status].
  */
