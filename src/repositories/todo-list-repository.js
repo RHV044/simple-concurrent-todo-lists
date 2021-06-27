@@ -1,23 +1,23 @@
-// Para ejemplo, de hecho tiene una sola lista segun esto
 
 class TodoListRepository {
 
     constructor(elements) {
-        this.list = elements
+        this.lists = elements
     }
 
-    add(element) {
-        this.list.push(element)
+    addList(element) {
+        this.lists.push(element)
     }
 
-    remove(element) {
-        let index = this.list.indexOf(element)
-        this.list.splice(index, 1)
+    removeList(id) {
+       // TODO
     }
 
-    updatePosition(element, position) {
-        this.remove(element)
-        this.list[position] = element
+    /** Checks whether the list is blocked or not and blocks it if it wasn't.
+     * Returns true if the list was available. */
+    checkAndSetAvailability(id) {
+        // TODO
+        return true;
     }
 }
 

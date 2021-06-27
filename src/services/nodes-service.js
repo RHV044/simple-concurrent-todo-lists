@@ -9,6 +9,10 @@ class NodesService {
         return ClusterPortsRepository.getInstance().list();
     }
 
+    getAllButSelf() {
+        return this.get().filter(node => node !== Config.selfPort)
+    }
+
     add(port) {
         // If it's the registry then we should let know the nodes that a new port is available.
         if (Config.isRegistry) {

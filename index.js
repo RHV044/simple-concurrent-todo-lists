@@ -6,7 +6,7 @@ const app = new express();
 const Utils = require('./src/utils');
 const Config = require('./src/config');
 const healthCheckController = require('./src/controllers/health-check-controller');
-const listsController = require('./src/controllers/lists-controller');
+const todoListsController = require('./src/controllers/todo-lists-controller');
 const nodeController = require('./src/controllers/nodes-controller');
 
 const ClusterPortsRepository = require('./src/repositories/cluster-ports-repository');
@@ -19,11 +19,12 @@ if (!port) {
 
 app.use(express.json());
 app.use('/health-check', healthCheckController);
-app.use('/lists', listsController);
+app.use('/lists', todoListsController);
 app.use('/node', nodeController);
 
 const server = app.listen(port, () => {
     Utils.log(`Listening on port ${port}`)
+    Config.setSelfPort(port)
     axios
         .post(`${Utils.getUrlForPort(Config.getRegistryPort())}/node`, { port: port })
         .then(
