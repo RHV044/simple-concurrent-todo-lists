@@ -51,7 +51,7 @@ class TodoListsService {
         let createdList = this.createList(newList);
         let nodes = nodesService.getAllButSelf();
 
-        // We give a null listId because we are creating it.
+        // We give a null listId to call the list creation endpoint.
         let list = this.commitToNodes(nodes, null, createdList);
 
         return this.ok(list);
@@ -116,7 +116,7 @@ class TodoListsService {
     }
 
     commitToNodes(nodes, id, list) {
-        let committedListsToNodes = nodes.map(node => this.commitUpdatedList(node, id, list))
+        let committedListsToNodes = nodes.map(node => this.commitList(node, id, list))
 
         return Promise.all(committedListsToNodes)
             .then(_ => {
@@ -173,7 +173,7 @@ class TodoListsService {
             })
     }
 
-    commitUpdatedList(node, listId, list) {
+    commitList(node, listId, list) {
         // If the listId is present, then we update a current list, if not, then we create it.
         if(listId) {
             return axios.put(`${Utils.getUrlForPort(node)}/lists/${listId}/commit`, { list: list })
