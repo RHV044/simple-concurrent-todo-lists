@@ -104,8 +104,7 @@ router.patch('/:id/items/:index/position', (req, res) => {
  * POST /lists/commit
  * { "list" : [list] }
  * 
- * Commits the updated list that other instances verified on top of the previous list. 
- * It also makes the list available after the change is made.
+ * Commits the created list to the other instances. 
  * 
  */
  router.post('/commit', (req, res) => {
