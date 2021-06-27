@@ -7,6 +7,10 @@ class TodoListRepository {
         this.index = 0
     }
 
+    get() {
+        return this.lists;
+    }
+
     createList(list) {
         const todoList = new TodoList(this.index, list.title, list.creator)
         this.lists.push(todoList)

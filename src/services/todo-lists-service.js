@@ -9,6 +9,10 @@ class TodoListsService {
 
     // ---------------------- REPOSITORY SERVICES ----------------------//
 
+    get() {
+        return listRepository.get();
+    }
+
     checkAndSetAvailability(id) {
         return listRepository.checkAndSetAvailability(id);
     }
