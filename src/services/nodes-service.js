@@ -10,7 +10,6 @@ class NodesService {
     }
 
     getAllButSelf() {
-        console.log("SELF", Config.selfPort)
         return this.get().filter(node => node !== Config.selfPort)
     }
 
