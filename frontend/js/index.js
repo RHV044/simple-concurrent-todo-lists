@@ -3,7 +3,7 @@ const USER_NAME = animals[Math.floor(Math.random() * animals.length)];
 $(document).ready(function () {
     $('#user-name').html(USER_NAME);
     updateLists();
-    setInterval(() => updateLists(), 10000); // Check the lists every 10 seconds.
+    //setInterval(() => updateLists(), 10000); // Check the lists every 10 seconds.
 });
 
 function updateLists() {
@@ -75,6 +75,15 @@ function toggleTaskChecked(listId, taskIndex, actualStatus) {
         .fail(() => showErrorAndPerformUpdate("Error al modificar la tarea", "Hubo un error al modificar el estado de la tarea, intentelo nuevamente"));
 }
 
+function moveTask(listId, taskIndex, plusIndex) {
+    doBackendApiCall("PATCH", `lists/${listId}/items/${taskIndex}/position`,
+        {
+            "new_index": parseInt(taskIndex) + parseInt(plusIndex)
+        })
+        .then((response) => updateListView(response.list))
+        .fail(() => showErrorAndPerformUpdate("Error al modificar la tarea", "Hubo un error al modificar la posición de la tarea, intentelo nuevamente"));
+}
+
 function addListView(todoList) {
     $('#todo-lists-container').append(TODO_LIST_HTML
         .replaceAll('{todo_list_title}', todoList.title)
@@ -91,6 +100,8 @@ function updateListView(todoList) {
         .replaceAll('{todo_list_task_is_checked}', task.done.toString().toLowerCase() == "true" ? 'true' : 'false')
         .replaceAll('{todo_list_task_index}', index)
         .replaceAll('{todo_list_id}', todoList.id)
+        .replaceAll('{todo_list_task_icon_disabled_up}', index + 1 == todoList.list.length ? "disabled-icon-button" : "")
+        .replaceAll('{todo_list_task_icon_disabled_down}', index == 0 ? "disabled-icon-button" : "")
         .replaceAll('{todo_list_task}', task.text), ""));
 }
 

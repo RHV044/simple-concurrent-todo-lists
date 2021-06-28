@@ -18,9 +18,12 @@ const TODO_LIST_HTML =
 const TODO_LIST_TASK_HTML = 
 '<li class="{todo_list_task_completed}">' +
     '<div class="form-check">' +
+        '<i class="fa fa-arrow-up {todo_list_task_icon_disabled_up}" onclick="moveTask(\'{todo_list_id}\', \'{todo_list_task_index}\', +1)"></i>' +
+        '<i class="fa fa-arrow-down {todo_list_task_icon_disabled_down}" onclick="moveTask(\'{todo_list_id}\', \'{todo_list_task_index}\', -1)"></i>' +
+        '<i class="fa fa-pencil" onclick="editTask(\'{todo_list_id}\', \'{todo_list_task_index}\', \'{todo_list_task}\')"></i>' +
         '<div class="form-check-label">' +
             '<input onclick="toggleTaskChecked(\'{todo_list_id}\', \'{todo_list_task_index}\', {todo_list_task_is_checked})" class="checkbox" type="checkbox" {todo_list_task_checked}>' +
-            '<p onclick="editTask(\'{todo_list_id}\', \'{todo_list_task_index}\', \'{todo_list_task}\')">{todo_list_task} <i class="fa fa-pencil"></i></p>' +
+            '<p>{todo_list_task}</p>' +
         '</div>' +
     '</div>' +
 '</li>';
