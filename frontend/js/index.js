@@ -65,7 +65,7 @@ function editTask(listId, taskIndex, task) {
             text: newTask
         })
         .then((response) => updateListView(response.list))
-        .fail(() => showErrorAndPerformUpdate("Error al modificar la tarea", "Hubo un error al intentar la creación de la tarea, intentelo nuevamente"));
+        .fail(() => showErrorAndPerformUpdate("Error al modificar la tarea", "Hubo un error al modificar la tarea, intentelo nuevamente"));
 
 }
 
