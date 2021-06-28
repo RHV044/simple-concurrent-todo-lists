@@ -7,20 +7,25 @@ const listsService = new ListsService()
 
 /**
  * POST /lists
- * { "list": [list] }
+ * {
+ *   "list": {
+ *       "title": "Things to do",
+ *       "creator": "Pepe"
+ *   }
+ * }
  *
  * Creates a list.
  */
 router.post('/', (req, res) => {
     const list = req.body.list
-    
-    result = listsService.performCreateList(list)
+
+    const result = listsService.performCreateList(list)
 
     result.list.then(list => {
-        if(list) 
-            res.status(201).json(list) 
+        if (list)
+            res.status(201).json(list)
         else
-            res.status(422).json({ message: "Couldn't create the list." })  
+            res.status(422).json({message: "Couldn't create the list."})
     })
 })
 
@@ -36,7 +41,12 @@ router.patch('/:id/availability', (req, res) => {
 
 /**
  * POST /lists/:id/items
- * { "item": "do homework" }
+ * {
+ *  "item": {
+ *   "text": "do homework",
+ *   "done": false
+ *  }
+ * }
  *
  * Adds an item to a list.
  */
@@ -48,28 +58,28 @@ router.post('/:id/items', (req, res) => {
 
 /**
  * PUT /lists/:id/items/:index
- * { "item": "take a shower" }
+ * { "text": "take a shower" }
  *
- * Replaces the item [index] with the given.
+ * Updates the item [index]'s text with the given.
  */
 router.put('/:id/items/:index', (req, res) => {
     const listId = req.params.id
     const itemIndex = req.params.index
-    const item = req.body.item
-    TodoListsController.handleResult(listsService.performUpdateItem(listId, itemIndex, item), res)
+    const text = req.body.text
+    TodoListsController.handleResult(listsService.performUpdateItem(listId, itemIndex, text), res)
 })
 
 /**
- * PATCH /lists/:id/items/:index/ready?status=:status
+ * PATCH /lists/:id/items/:index/done?status=:status
  *
- * Changes the item [index] ready status from the list as [status].
+ * Changes the item [index] done status from the list as [status].
  */
- router.patch('/:id/items/:index/ready', (req, res) => {
+router.patch('/:id/items/:index/done', (req, res) => {
     const listId = req.params.id
     const itemIndex = req.params.index
-    const ready = req.query.status
+    const done = req.query.status
     TodoListsController.handleResult(
-        listsService.performUpdateItemReadyStatus(listId, itemIndex, ready), res
+        listsService.performUpdateItemDoneStatus(listId, itemIndex, done), res
     )
 })
 
@@ -93,7 +103,7 @@ router.patch('/:id/items/:index/position', (req, res) => {
  *
  * Deletes the item [index] from the list.
  */
- router.delete('/:id/items/:index', (req, res) => {
+router.delete('/:id/items/:index', (req, res) => {
     const listId = req.params.id
     const itemIndex = req.params.index
     TodoListsController.handleResult(listsService.performDeleteItem(listId, itemIndex), res)
@@ -102,11 +112,11 @@ router.patch('/:id/items/:index/position', (req, res) => {
 /**
  * POST /lists/commit
  * { "list" : [list] }
- * 
- * Commits the created list to the other instances. 
- * 
+ *
+ * Commits the created list to the other instances.
+ *
  */
- router.post('/commit', (req, res) => {
+router.post('/commit', (req, res) => {
     const newList = req.body.list
 
     const list = listsService.createList(newList)
@@ -115,39 +125,36 @@ router.patch('/:id/items/:index/position', (req, res) => {
         console.log("Successful commit: list created")
         res.status(204).send()
     } else {
-        res.status(422).json({ message: "Couldn't commit the created list." })
+        res.status(422).json({message: "Couldn't commit the created list."})
     }
 });
 
 /**
  * PUT /lists/:id/commit
  * { "list" : [list] }
- * 
- * Commits the updated list that other instances verified on top of the previous list. 
+ *
+ * Commits the updated list that other instances verified on top of the previous list.
  * It also makes the list available after the change is made.
- * 
+ *
  */
 router.put('/:id/commit', (req, res) => {
     const listId = req.params.id
     const updatedList = req.body.list
 
-    const list = listsService.updateAndUnlockList(listId, updatedList)
-
-    if (list) {
-        console.log("Successful commit: list updated")
-        res.status(204).send()
-    } else {
-        res.status(422).json({ message: "Couldn't commit the updated list." })
-    }
+    listsService.updateAndUnlockList(listId, updatedList)
+    console.log("Successful commit: list updated")
+    res.status(204).send()
 });
 
 class TodoListsController {
     static handleResult(resultPromise, res) {
         resultPromise.then(result => {
             if (result.isOk)
-                result.list.then(list => { res.json({ list: list }) })
+                result.list.then(list => {
+                    res.json({list: list})
+                })
             else
-                res.status(409).json({ message: result.message })
+                res.status(409).json({message: result.message})
         })
     }
 }
