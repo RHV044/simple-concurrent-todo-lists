@@ -372,10 +372,6 @@ input[type="checkbox"] {
     display: flex !important
 }
 
-.vertical-item {
-    margin-bottom: 20px;
-}
-
 .alignment-right {
     text-align: right;
 } 
@@ -394,4 +390,21 @@ input[type="checkbox"] {
     cursor: pointer;
     margin: 0 7px;
     white-space: initial;
+}
+
+.header-container {
+    position: fixed;
+    background: #d8d8dd;
+    z-index: 999;
+    top: 0;
+    left: 0;
+    padding: 30px 25px;
+    width: 100%;
+    max-width: none;
+    border-bottom: 1px solid #6c757d;
+    margin-left: 0 !important;
+}
+
+.todo-lists-container {
+    margin-top: 100px;
 }

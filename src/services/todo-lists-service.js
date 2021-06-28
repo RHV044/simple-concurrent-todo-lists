@@ -148,6 +148,12 @@ class TodoListsService {
     checkAvailability(id) {
         if (listRepository.checkAndSetAvailability(id)) {
             let checkNodesAvailability = nodesService.getAllButSelf().map(node => this.askAvailability(node, id));
+            if (checkNodesAvailability.length == 0) {
+                return Promise.resolve({
+                    hasQuorum: true,
+                    nodesSaidYes: []
+                });
+            }
             const requiredQuorum = Math.floor(nodesService.get().length / 2)
             return Promise.all(checkNodesAvailability)
                 .then(responses => responses.filter(response => response.isAvailable).map(response => response.node))

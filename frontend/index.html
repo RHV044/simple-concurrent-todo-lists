@@ -17,21 +17,21 @@
 <body>
   <div class="page-content page-container" id="page-content">
     <div class="padding">
-      <div class="container d-flex">
+      <div class="container d-flex header-container">
         <div class="col-lg-4">
-          <input id="todo-list-title" type="text" class="form-control todo-list-input vertical-item" placeholder="Título de la lista">
+          <input id="todo-list-title" type="text" class="form-control todo-list-input" placeholder="Título de la lista">
         </div>
         <div class="col-lg-4">
           <button onclick="addTodoList()"
-            class="add btn btn-secondary font-weight-bold todo-list-add-btn vertical-item">
+            class="add btn btn-secondary font-weight-bold todo-list-add-btn">
             Agregar todo list
           </button>
         </div>
         <div class="col-lg-4 alignment-right">
-          Tu nombre es <b id="user-name"></b>
+          Vos sos <b id="user-name"></b>
         </div>
       </div>
-      <div id="todo-lists-container" class="container d-flex"></div>
+      <div id="todo-lists-container" class="container d-flex todo-lists-container"></div>
       <div aria-live="polite" aria-atomic="true">
         <div id="toast-error" class="toast toast-danger" style="position: absolute; top: 30px; right: 30px;">
           <div class="toast-header">

@@ -2,10 +2,12 @@ const USER_NAME = animals[Math.floor(Math.random() * animals.length)];
 
 $(document).ready(function () {
     $('#user-name').html(USER_NAME);
-    getLists();
+    updateLists();
+    setInterval(() => updateLists(), 10000);
 });
 
-function getLists() {
+function updateLists() {
+    console.log("Updating lists");
     askForNode()
         .then((response) => $.ajax({
             url: `http://localhost:${response.port}/lists`,
@@ -13,8 +15,14 @@ function getLists() {
             contentType: "application/json; charset=utf-8",
             dataType: "json"
         }))
-        .then((response) => response.forEach((list) => addListView(list)))
-        .fail(() => showError("Error al crear la lista", "Hubo un error al intentar la creación de la lista, intentelo nuevamente"));
+        .then((response) => response.forEach((todoList) => {
+            if ($(`#todo-list-hash-${todoList.id}`).length == 0) {
+                addListView(todoList);
+            } else if ($(`#todo-list-hash-${todoList.id}`).val() != todoList.hashVersion) { 
+                // TODO: test it when hash is implemented (it's working now because "null" != null no it's updating allways :))
+                updateListView(todoList);
+            }
+        }));
 }
 
 function addTodoList(id) {
@@ -36,7 +44,7 @@ function addTodoList(id) {
             contentType: "application/json; charset=utf-8",
             dataType: "json"
         }))
-        .then((response) => addListView(response.list))
+        .then((response) => addListView(response))
         .fail(() => showError("Error al crear la lista", "Hubo un error al intentar la creación de la lista, intentelo nuevamente"));
 }
 
@@ -59,11 +67,11 @@ function addTodoListTask(id) {
             contentType: "application/json; charset=utf-8",
             dataType: "json"
         }))
-        .then((response) => updateListView(id, response.list))
+        .then((todoList) => updateListView(todoList))
         .fail(() => showError("Error al crear la tarea", "Hubo un error al intentar la creación de la tarea, intentelo nuevamente"));
 }
 
-function editTask(listId, taskId, task) {
+function editTask(listId, taskIndex, task) {
     var newTask = prompt(`Modificar la tarea "${task}" a:`);
     if (newTask === null) return; // Cancel button was clicked
     if (!newTask || newTask.trim().length == 0) {
@@ -72,7 +80,7 @@ function editTask(listId, taskId, task) {
     }
     askForNode()
         .then((response) => $.ajax({
-            url: `http://localhost:${response.port}/lists/${listId}/items/${taskId}`,
+            url: `http://localhost:${response.port}/lists/${listId}/items/${taskIndex}`,
             type: "PUT",
             data: JSON.stringify({
                 text: newTask
@@ -80,40 +88,42 @@ function editTask(listId, taskId, task) {
             contentType: "application/json; charset=utf-8",
             dataType: "json"
         }))
-        .then((response) => updateListView(id, response.list))
+        .then((todoList) => updateListView(todoList))
         .fail(() => showError("Error al modificar la tarea", "Hubo un error al intentar la creación de la tarea, intentelo nuevamente"));
 
 }
 
-function toggleTaskChecked(listId, taskId, actualStatus) {
+function toggleTaskChecked(listId, taskIndex, actualStatus) {
     askForNode()
         .then((response) => $.ajax({
-            url: `http://localhost:${response.port}/lists/${listId}/items/${taskId}/done`,
-            type: "PUT",
-            data: JSON.stringify({
-                status: !actualStatus
-            }),
+            url: `http://localhost:${response.port}/lists/${listId}/items/${taskIndex}/done?status=${!actualStatus}`,
+            type: "PATCH",
             contentType: "application/json; charset=utf-8",
             dataType: "json"
         }))
-        .then((response) => updateListView(id, response.list))
+        .then((todoList) => {
+            console.log(todoList)
+            updateListView(todoList)
+        })
         .fail(() => showError("Error al modificar la tarea", "Hubo un error al intentar la creación de la tarea, intentelo nuevamente"));
 }
 
-function addListView(list) {
+function addListView(todoList) {
     $('#todo-lists-container').append(TODO_LIST_HTML
-        .replaceAll('{todo_list_title}', list.title)
-        .replaceAll('{todo_list_id}', list.id));
-    if (list.list && list.list.length > 0) updateListView(list.id, list.list);
+        .replaceAll('{todo_list_title}', todoList.title)
+        .replaceAll('{todo_list_hash}', todoList.hashVersion)
+        .replaceAll('{todo_list_id}', todoList.id));
+    if (todoList.list && todoList.list.length > 0) updateListView(todoList);
 }
 
-function updateListView(id, list) {
-    $(`#todo-list-container-${id} .todo-list`).html(list.reduce((acc, task) => acc + TODO_LIST_TASK_HTML
-        .replaceAll('{todo_list_task_completed}', task.done ? 'completed' : '')
-        .replaceAll('{todo_list_task_checked}', task.done ? 'checked' : '')
-        .replaceAll('{todo_list_task_is_checked}', task.done ? 'true' : 'false')
-        .replaceAll('{todo_list_task_id}', task.id)
-        .replaceAll('{todo_list_id}', id)
+function updateListView(todoList) {
+    $(`#todo-list-hash-${todoList.id}`).val(todoList.hashVersion);
+    $(`#todo-list-container-${todoList.id} .todo-list`).html(todoList.list.reduce((acc, task, index) => acc + TODO_LIST_TASK_HTML
+        .replaceAll('{todo_list_task_completed}', task.done.toString().toLowerCase() == "true" ? 'completed' : '')
+        .replaceAll('{todo_list_task_checked}', task.done.toString().toLowerCase() == "true" ? 'checked' : '')
+        .replaceAll('{todo_list_task_is_checked}', task.done.toString().toLowerCase() == "true" ? 'true' : 'false')
+        .replaceAll('{todo_list_task_index}', index)
+        .replaceAll('{todo_list_id}', todoList.id)
         .replaceAll('{todo_list_task}', task.text), ""));
 }
 
