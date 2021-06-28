@@ -3,7 +3,7 @@ const USER_NAME = animals[Math.floor(Math.random() * animals.length)];
 $(document).ready(function () {
     $('#user-name').html(USER_NAME);
     updateLists();
-    setInterval(() => updateLists(), 10000);
+    setInterval(() => updateLists(), 10000); // Check the lists every 10 seconds.
 });
 
 function updateLists() {
@@ -13,7 +13,7 @@ function updateLists() {
             if ($(`#todo-list-hash-${todoList.id}`).length == 0) {
                 addListView(todoList);
             } else if ($(`#todo-list-hash-${todoList.id}`).val() != todoList.hashVersion) {
-                // TODO: test it when hash is implemented (it's working now because "null" != null no it's updating allways :))
+                // TODO: test it when hash is implemented. It's working now because "null" != null so it's updating allways :)
                 updateListView(todoList);
             }
         }));
