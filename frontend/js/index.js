@@ -33,7 +33,7 @@ function addTodoList(id) {
             }
         })
         .then((response) => addListView(response))
-        .fail(() => showErrorAndPerformUpdate("Error al crear la lista", "Hubo un error al intentar la creación de la lista, intentelo nuevamente"));
+        .fail(() => showErrorAndPerformUpdate("Error al crear la lista", "Hubo un error al realizar la creación de la lista, intentelo nuevamente"));
 }
 
 function addTodoListTask(id) {
