@@ -22,7 +22,7 @@ function updateLists() {
 function addTodoList(id) {
     const title = $('#todo-list-title').val();
     if (!title || title.trim().length == 0) {
-        showError("Error al crear la lista", "Por favor complete el titulo de la lista")
+        showErrorAndPerformUpdate("Error al crear la lista", "Por favor complete el titulo de la lista")
         return;
     }
     doBackendApiCall("POST", "lists",
@@ -33,13 +33,13 @@ function addTodoList(id) {
             }
         })
         .then((response) => addListView(response))
-        .fail(() => showError("Error al crear la lista", "Hubo un error al intentar la creación de la lista, intentelo nuevamente"));
+        .fail(() => showErrorAndPerformUpdate("Error al crear la lista", "Hubo un error al intentar la creación de la lista, intentelo nuevamente"));
 }
 
 function addTodoListTask(id) {
     const task = $(`#todo-list-input-${id}`).val();
     if (!task || task.trim().length == 0) {
-        showError("Error al crear la tarea", "Por favor complete el texto")
+        showErrorAndPerformUpdate("Error al crear la tarea", "Por favor complete el texto")
         return;
     }
     doBackendApiCall("POST", `lists/${id}/items`,
@@ -50,14 +50,14 @@ function addTodoListTask(id) {
             }
         })
         .then((response) => updateListView(response.list))
-        .fail(() => showError("Error al crear la tarea", "Hubo un error al intentar la creación de la tarea, intentelo nuevamente"));
+        .fail(() => showErrorAndPerformUpdate("Error al crear la tarea", "Hubo un error al intentar la creación de la tarea, intentelo nuevamente"));
 }
 
 function editTask(listId, taskIndex, task) {
     var newTask = prompt(`Modificar la tarea "${task}" a:`);
     if (newTask === null) return; // Cancel button was clicked
     if (!newTask || newTask.trim().length == 0) {
-        showError("Error al modificar la tarea", "Por favor complete el texto")
+        showErrorAndPerformUpdate("Error al modificar la tarea", "Por favor complete el texto")
         return;
     }
     doBackendApiCall("PUT", `lists/${listId}/items/${taskIndex}`,
@@ -65,14 +65,14 @@ function editTask(listId, taskIndex, task) {
             text: newTask
         })
         .then((response) => updateListView(response.list))
-        .fail(() => showError("Error al modificar la tarea", "Hubo un error al intentar la creación de la tarea, intentelo nuevamente"));
+        .fail(() => showErrorAndPerformUpdate("Error al modificar la tarea", "Hubo un error al intentar la creación de la tarea, intentelo nuevamente"));
 
 }
 
 function toggleTaskChecked(listId, taskIndex, actualStatus) {
     doBackendApiCall("PATCH", `lists/${listId}/items/${taskIndex}/done?status=${!actualStatus}`)
         .then((response) => updateListView(response.list))
-        .fail(() => showError("Error al modificar la tarea", "Hubo un error al intentar la creación de la tarea, intentelo nuevamente"));
+        .fail(() => showErrorAndPerformUpdate("Error al modificar la tarea", "Hubo un error al intentar la creación de la tarea, intentelo nuevamente"));
 }
 
 function addListView(todoList) {
@@ -110,9 +110,10 @@ function askForNode() {
     return $.get('http://localhost:9000/node/any');
 }
 
-function showError(title, message) {
+function showErrorAndPerformUpdate(title, message) {
     $('#toast-error').toast({ animation: true, delay: 3000 });
     $("#toast-error-title").html(title);
     $("#toast-error-message").html(message);
     $('#toast-error').toast('show');
+    updateLists(); // Do this here because one of the most probable reasons of the error is that the list is not updated
 }
