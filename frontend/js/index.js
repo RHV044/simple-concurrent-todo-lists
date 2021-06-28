@@ -3,7 +3,7 @@ const USER_NAME = animals[Math.floor(Math.random() * animals.length)];
 $(document).ready(function () {
     $('#user-name').html(USER_NAME);
     updateLists();
-    //setInterval(() => updateLists(), 10000); // Check the lists every 10 seconds.
+    setInterval(() => updateLists(), 10000); // Check the lists every 10 seconds.
 });
 
 function updateLists() {
