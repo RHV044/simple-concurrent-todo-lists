@@ -67,7 +67,7 @@ function addTodoListTask(id) {
             contentType: "application/json; charset=utf-8",
             dataType: "json"
         }))
-        .then((todoList) => updateListView(todoList))
+        .then((response) => updateListView(response.list))
         .fail(() => showError("Error al crear la tarea", "Hubo un error al intentar la creación de la tarea, intentelo nuevamente"));
 }
 
@@ -88,7 +88,7 @@ function editTask(listId, taskIndex, task) {
             contentType: "application/json; charset=utf-8",
             dataType: "json"
         }))
-        .then((todoList) => updateListView(todoList))
+        .then((response) => updateListView(response.list))
         .fail(() => showError("Error al modificar la tarea", "Hubo un error al intentar la creación de la tarea, intentelo nuevamente"));
 
 }
@@ -101,10 +101,7 @@ function toggleTaskChecked(listId, taskIndex, actualStatus) {
             contentType: "application/json; charset=utf-8",
             dataType: "json"
         }))
-        .then((todoList) => {
-            console.log(todoList)
-            updateListView(todoList)
-        })
+        .then((response) => updateListView(response.list))
         .fail(() => showError("Error al modificar la tarea", "Hubo un error al intentar la creación de la tarea, intentelo nuevamente"));
 }
 

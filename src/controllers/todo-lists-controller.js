@@ -157,9 +157,7 @@ class TodoListsController {
     static handleResult(resultPromise, res) {
         resultPromise.then(result => {
             if (result.isOk)
-                result.list.then(list => {
-                    res.json({ list: list })
-                })
+                res.json({ list: result.list })
             else
                 res.status(409).json({ message: result.message })
         })
