@@ -12,7 +12,7 @@ function updateLists() {
         .then((response) => response.forEach((todoList) => {
             if ($(`#todo-list-hash-${todoList.id}`).length == 0) {
                 addListView(todoList);
-            } else if ($(`#todo-list-hash-${todoList.id}`).val() != todoList.hashVersion) {
+            } else if (getTodoListHash(todoList.id) != todoList.hashVersion) {
                 // TODO: test it when hash is implemented. It's working now because "null" != null so it's updating always :)
                 updateListView(todoList);
             }
@@ -25,7 +25,7 @@ function addTodoList(id) {
         showErrorAndPerformUpdate("Error al crear la lista", "Por favor complete el titulo de la lista")
         return;
     }
-    doBackendApiCall("POST", "lists",
+    doBackendApiCall("POST", "lists", null,
         {
             list: {
                 title: title,
@@ -42,7 +42,7 @@ function addTodoListTask(id) {
         showErrorAndPerformUpdate("Error al crear la tarea", "Por favor complete el texto")
         return;
     }
-    doBackendApiCall("POST", `lists/${id}/items`,
+    doBackendApiCall("POST", `lists/${id}/items`, id,
         {
             item: {
                 text: task,
@@ -60,7 +60,7 @@ function editTask(listId, taskIndex, task) {
         showErrorAndPerformUpdate("Error al modificar la tarea", "Por favor complete el texto")
         return;
     }
-    doBackendApiCall("PUT", `lists/${listId}/items/${taskIndex}`,
+    doBackendApiCall("PUT", `lists/${listId}/items/${taskIndex}`, listId,
         {
             text: newTask
         })
@@ -70,13 +70,13 @@ function editTask(listId, taskIndex, task) {
 }
 
 function toggleTaskChecked(listId, taskIndex, actualStatus) {
-    doBackendApiCall("PATCH", `lists/${listId}/items/${taskIndex}/done?status=${!actualStatus}`)
+    doBackendApiCall("PATCH", `lists/${listId}/items/${taskIndex}/done?status=${!actualStatus}`, listId)
         .then((response) => updateListView(response.list))
         .fail(() => showErrorAndPerformUpdate("Error al modificar la tarea", "Hubo un error al modificar el estado de la tarea, intentelo nuevamente"));
 }
 
 function moveTask(listId, taskIndex, plusIndex) {
-    doBackendApiCall("PATCH", `lists/${listId}/items/${taskIndex}/position`,
+    doBackendApiCall("PATCH", `lists/${listId}/items/${taskIndex}/position`, listId,
         {
             "new_index": parseInt(taskIndex) + parseInt(plusIndex)
         })
@@ -105,16 +105,22 @@ function updateListView(todoList) {
         .replaceAll('{todo_list_task}', task.text), ""));
 }
 
-function doBackendApiCall(type, endpoint, body = null) {
-    console.log(`${type} ${endpoint}`, body)
+function doBackendApiCall(type, endpoint, listId = null, body = null) {
+    const listHash = listId != null ? getTodoListHash(listId) : null;
+    const headers = listHash != null ? { 'X-List-Hash': listHash } : null;
     return askForNode()
         .then((response) => $.ajax({
             url: `http://localhost:${response.port}/${endpoint}`,
             type: type,
+            headers: headers,
             data: body != null ? JSON.stringify(body) : null,
             contentType: "application/json; charset=utf-8",
             dataType: "json"
         }))
+}
+
+function getTodoListHash(listId) {
+    return $(`#todo-list-hash-${listId}`).val();
 }
 
 function askForNode() {
