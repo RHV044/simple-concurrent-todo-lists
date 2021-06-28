@@ -13,7 +13,7 @@ function updateLists() {
             if ($(`#todo-list-hash-${todoList.id}`).length == 0) {
                 addListView(todoList);
             } else if ($(`#todo-list-hash-${todoList.id}`).val() != todoList.hashVersion) {
-                // TODO: test it when hash is implemented. It's working now because "null" != null so it's updating allways :)
+                // TODO: test it when hash is implemented. It's working now because "null" != null so it's updating always :)
                 updateListView(todoList);
             }
         }));
