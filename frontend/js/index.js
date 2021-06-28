@@ -50,7 +50,7 @@ function addTodoListTask(id) {
             }
         })
         .then((response) => updateListView(response.list))
-        .fail(() => showErrorAndPerformUpdate("Error al crear la tarea", "Hubo un error al intentar la creación de la tarea, intentelo nuevamente"));
+        .fail(() => showErrorAndPerformUpdate("Error al crear la tarea", "Hubo un error al realizar la creación de la tarea, intentelo nuevamente"));
 }
 
 function editTask(listId, taskIndex, task) {
