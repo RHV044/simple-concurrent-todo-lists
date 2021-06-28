@@ -72,7 +72,7 @@ function editTask(listId, taskIndex, task) {
 function toggleTaskChecked(listId, taskIndex, actualStatus) {
     doBackendApiCall("PATCH", `lists/${listId}/items/${taskIndex}/done?status=${!actualStatus}`)
         .then((response) => updateListView(response.list))
-        .fail(() => showErrorAndPerformUpdate("Error al modificar la tarea", "Hubo un error al intentar la creación de la tarea, intentelo nuevamente"));
+        .fail(() => showErrorAndPerformUpdate("Error al modificar la tarea", "Hubo un error al modificar el estado de la tarea, intentelo nuevamente"));
 }
 
 function addListView(todoList) {
