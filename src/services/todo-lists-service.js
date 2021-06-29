@@ -17,6 +17,10 @@ class TodoListsService {
         return listRepository.createList(list);
     }
 
+    getList(id) {
+        return listRepository.getList(id);
+    }
+
     updateAndUnlockList(id, list) {
         listRepository.updateList(id, list);
         listRepository.checkAndSetAvailability(id, true);
