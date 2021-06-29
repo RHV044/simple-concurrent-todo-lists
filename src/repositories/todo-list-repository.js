@@ -18,6 +18,10 @@ class TodoListRepository {
         return todoList
     }
 
+    getList(id) {
+        return this.findList(id)
+    }
+
     /** Updates list on commit  */
     updateList(id, list) {
         this.findList(id).list = list
