@@ -30,6 +30,21 @@ router.post('/', (req, res) => {
 })
 
 /**
+ * GET /lists/:id
+ *
+ * Returns the specified list
+ */
+ router.get('/:id', (req, res) => {
+    const listId = req.params.id
+
+    const list = listsService.getList(listId)
+    if (list)
+        res.status(200).json(list)
+    else
+        res.status(404).json({message: "Couldn't find the list with ID " + listId})
+})
+
+/**
  * PATCH /lists/:id/availability
  *
  * Returns whether the list is available and then blocks it.
