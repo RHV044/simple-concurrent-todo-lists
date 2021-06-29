@@ -56,42 +56,42 @@ class TodoListsService {
         return this.ok(list);
     }
 
-    performAddItem(listId, item) {
-        return this.performAction(listId, _ => {
+    performAddItem(listHash, listId, item) {
+        return this.performAction(listHash, listId, _ => {
             // We add the item locally
             return this.addItem(listId, item);
         })
     }
 
-    performUpdateItem(listId, index, text) {
-        return this.performAction(listId, _ => {
+    performUpdateItem(listHash, listId, index, text) {
+        return this.performAction(listHash, listId, _ => {
             // We update the text locally
             return this.updateItemText(listId, index, text);
         })
     }
 
-    performUpdateItemDoneStatus(listId, index, isDone) {
-        return this.performAction(listId, _ => {
+    performUpdateItemDoneStatus(listHash, listId, index, isDone) {
+        return this.performAction(listHash, listId, _ => {
             // We update the item ready status locally
             return this.updateItemDoneStatus(listId, index, isDone);
         })
     }
 
-    performUpdateItemPosition(listId, index, newIndex) {
-        return this.performAction(listId, _ => {
+    performUpdateItemPosition(listHash, listId, index, newIndex) {
+        return this.performAction(listHash, listId, _ => {
             // We update the item position locally
             return this.updateItemPosition(listId, index, newIndex);
         })
     }
 
-    performDeleteItem(listId, index) {
-        return this.performAction(listId, _ => {
+    performDeleteItem(listHash, listId, index) {
+        return this.performAction(listHash, listId, _ => {
             // We delete the item locally
             return this.deleteItem(listId, index);
         })
     }
 
-    performAction(id, action) {
+    performAction(hash, id, action) {
         // If the id is null, it means it is a creation and there is no need to check for availability.
         if (id == null) return Promise.resolve(this.ok(action(nodesService.getAllButSelf())));
 

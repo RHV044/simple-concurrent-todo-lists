@@ -51,9 +51,14 @@ router.patch('/:id/availability', (req, res) => {
  * Adds an item to a list.
  */
 router.post('/:id/items', (req, res) => {
+    const listHash = req.headers['X-List-Hash']
     const listId = req.params.id
     const item = req.body.item
-    TodoListsController.handleResult(listsService.performAddItem(listId, item), res)
+
+    TodoListsController.handleResult(
+        listsService.performAddItem(listHash, listId, item),
+        res
+    )
 })
 
 /**
@@ -63,10 +68,15 @@ router.post('/:id/items', (req, res) => {
  * Updates the item [index]'s text with the given.
  */
 router.put('/:id/items/:index', (req, res) => {
+    const listHash = req.headers['X-List-Hash']
     const listId = req.params.id
     const itemIndex = req.params.index
     const text = req.body.text
-    TodoListsController.handleResult(listsService.performUpdateItem(listId, itemIndex, text), res)
+
+    TodoListsController.handleResult(
+        listsService.performUpdateItem(listHash, listId, itemIndex, text), 
+        res
+    )
 })
 
 /**
@@ -75,11 +85,14 @@ router.put('/:id/items/:index', (req, res) => {
  * Changes the item [index] done status from the list as [status].
  */
 router.patch('/:id/items/:index/done', (req, res) => {
+    const listHash = req.headers['X-List-Hash']
     const listId = req.params.id
     const itemIndex = req.params.index
     const done = req.query.status
+
     TodoListsController.handleResult(
-        listsService.performUpdateItemDoneStatus(listId, itemIndex, done), res
+        listsService.performUpdateItemDoneStatus(listId, itemIndex, done), 
+        res
     )
 })
 
@@ -90,11 +103,14 @@ router.patch('/:id/items/:index/done', (req, res) => {
  * Moves the item [index] to the new index.
  */
 router.patch('/:id/items/:index/position', (req, res) => {
+    const listHash = req.headers['X-List-Hash']
     const listId = req.params.id
     const itemIndex = req.params.index
     const newIndex = req.body.new_index
+
     TodoListsController.handleResult(
-        listsService.performUpdateItemPosition(listId, itemIndex, newIndex), res
+        listsService.performUpdateItemPosition(listHash, listId, itemIndex, newIndex), 
+        res
     )
 })
 
@@ -104,10 +120,17 @@ router.patch('/:id/items/:index/position', (req, res) => {
  * Deletes the item [index] from the list.
  */
 router.delete('/:id/items/:index', (req, res) => {
+    const listHash = req.headers['X-List-Hash']
     const listId = req.params.id
     const itemIndex = req.params.index
-    TodoListsController.handleResult(listsService.performDeleteItem(listId, itemIndex), res)
+
+    TodoListsController.handleResult(
+        listsService.performDeleteItem(listHash, listId, itemIndex), 
+        res
+    )
 })
+
+// ---------------------- COMMIT ENDPOINTS ----------------------//
 
 /**
  * POST /lists/commit

@@ -5,7 +5,7 @@ class TodoList {
         this.title = title
         this.creator = creator
         this.list = []
-        this.hashVersion = null // TODO: CREATE HASH
+        this.hashVersion = crypto.randomBytes(20).toString('hex');
         this.availability = true
     }
 }
