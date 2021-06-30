@@ -6,6 +6,13 @@ const listsService = new ListsService()
 // ---------------------- LIST ENDPOINTS ----------------------//
 
 /**
+ * GET /lists
+ *
+ * Returns all the lists.
+ */
+router.get('/', (_, res) => res.json(listsService.get()));
+
+/**
  * POST /lists
  * {
  *   "list": {
@@ -25,7 +32,7 @@ router.post('/', (req, res) => {
         if (list)
             res.status(201).json(list)
         else
-            res.status(422).json({message: "Couldn't create the list."})
+            res.status(422).json({ message: "Couldn't create the list." })
     })
 })
 
@@ -35,7 +42,7 @@ router.post('/', (req, res) => {
  * Returns whether the list is available and then blocks it.
  */
 router.patch('/:id/availability', (req, res) => {
-    return res.json({isAvailable: listsService.checkAndSetAvailability(req.params.id)})
+    return res.json({ isAvailable: listsService.checkAndSetAvailability(req.params.id) })
 });
 
 
@@ -148,7 +155,7 @@ router.post('/commit', (req, res) => {
         console.log("Successful commit: list created")
         res.status(204).send()
     } else {
-        res.status(422).json({message: "Couldn't commit the created list."})
+        res.status(422).json({ message: "Couldn't commit the created list." })
     }
 });
 
@@ -173,11 +180,9 @@ class TodoListsController {
     static handleResult(resultPromise, res) {
         resultPromise.then(result => {
             if (result.isOk)
-                result.list.then(list => {
-                    res.json({list: list})
-                })
+                res.json({ list: result.list })
             else
-                res.status(409).json({message: result.message})
+                res.status(409).json({ message: result.message })
         })
     }
 }
