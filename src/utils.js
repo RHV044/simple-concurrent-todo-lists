@@ -12,6 +12,15 @@ class Utils {
     static log(message) {
         console.log(`${Utils.getCurrentTime()} >> ${message}`)
     }
+
+    static groupBy(array, key) {
+        return array.reduce((acc, obj) => {
+        const property = obj[key];
+        acc[property] = acc[property] || [];
+        acc[property].push(obj);
+        return acc;
+        }, {});
+    }
 }
 
 module.exports = Utils
