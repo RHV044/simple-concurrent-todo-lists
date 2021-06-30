@@ -12,6 +12,10 @@ class Utils {
     static log(message) {
         console.log(`${Utils.getCurrentTime()} >> ${message}`)
     }
+
+    static generateRandomHash() {
+        return crypto.randomBytes(20).toString('hex');
+    }
 }
 
 module.exports = Utils

@@ -92,9 +92,10 @@ class TodoListsService {
     }
 
     performAction(hash, id, action) {
-        // If the id is null, it means it is a creation and there is no need to check for availability.
-        if (id == null) return Promise.resolve(this.ok(action(nodesService.getAllButSelf())));
-
+        // Check the list hash version for front-end concurrency conflicts 
+        if (listRepository.findList(id).hashVersion != hash) 
+            this.error("Unable to update list because it's an older version. Please reload the page.")
+        
         return this.checkAvailability(id).then(quorumAvailability => {
             if (quorumAvailability.hasQuorum) {
                 // Apply the action to the list locally
@@ -107,10 +108,7 @@ class TodoListsService {
                 return this.ok(list)
             }
             else
-                return {
-                    isOk: false,
-                    message: "Unable to update list because is being modified by another user"
-                }
+                this.error("Unable to update list because is being modified by another user")
         })
     }
 
@@ -130,6 +128,13 @@ class TodoListsService {
         return {
             isOk: true,
             list: list
+        }
+    }
+
+    error(message) {
+        return {
+            isOk: false,
+            message: message
         }
     }
 

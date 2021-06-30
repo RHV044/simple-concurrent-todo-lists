@@ -1,5 +1,5 @@
 const TodoList = require('../model/todoList');
-
+const Utils = require('./src/utils');
 class TodoListRepository {
 
     constructor(elements) {
@@ -22,19 +22,19 @@ class TodoListRepository {
     addItem(id, item) {
         const list = this.findList(id).list
         list.push(item)
-        return list
+        return this.updatedList(list)
     }
 
     updateItemText(id, index, text) {
         const list = this.findList(id).list
         list[index].text = text
-        return list
+        return this.updatedList(List)
     }
 
     updateItemDoneStatus(id, index, done) {
         const list = this.findList(id).list
         list[index].done = done
-        return list
+        return this.updatedList(list)
     }
 
     updateItemPosition(id, index, newIndex) {
@@ -42,13 +42,17 @@ class TodoListRepository {
         const element = list[index];
         list.splice(index, 1);
         list.splice(newIndex, 0, element);
-        return list
+        return this.updatedList(list)
     }
 
     deleteItem(id, index) {
         const list = this.findList(id)
         list.splice(index, 1)
-        return list
+        return this.updatedList(list)
+    }
+
+    updatedList(list) {
+        list.hashVersion = Utils.generateRandomHash();
     }
 
     /** Checks whether the list is blocked or not and blocks/unblocks it.

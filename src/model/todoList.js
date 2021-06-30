@@ -1,11 +1,11 @@
-
+const Utils = require('./src/utils');
 class TodoList {
     constructor(id, title, creator) {
         this.id = id
         this.title = title
         this.creator = creator
         this.list = []
-        this.hashVersion = crypto.randomBytes(20).toString('hex');
+        this.hashVersion = Utils.generateRandomHash()
         this.availability = true
     }
 }
