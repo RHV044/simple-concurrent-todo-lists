@@ -1,4 +1,4 @@
-const Utils = require('./src/utils');
+const Utils = require('../utils');
 class TodoList {
     constructor(id, title, creator) {
         this.id = id

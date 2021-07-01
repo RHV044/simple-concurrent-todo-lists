@@ -1,5 +1,5 @@
 const TodoList = require('../model/todoList');
-const Utils = require('./src/utils');
+const Utils = require('../utils');
 class TodoListRepository {
 
     constructor(elements) {
@@ -57,6 +57,7 @@ class TodoListRepository {
 
     updatedList(list) {
         list.hashVersion = Utils.generateRandomHash();
+        return list;
     }
 
     /** Checks whether the list is blocked or not and blocks/unblocks it.
