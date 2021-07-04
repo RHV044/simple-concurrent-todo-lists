@@ -59,8 +59,8 @@ const server = app.listen(port, () => {
 });
 
 // Gracefull stop by listening to Signal Interruption (ctrl+c)
-process.on('SIGINT', shutdown());
-process.on('SIGTERM', shutdown());
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
 
 function shutdown(){
     Utils.log("Gracefully shutting down node...");
