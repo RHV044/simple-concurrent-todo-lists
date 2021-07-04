@@ -22,7 +22,7 @@ class TodoListsService {
     }
 
     getList(id) {
-        return listRepository.getList(id);
+        return listRepository.getList(id)
     }
 
     updateAndUnlockList(id, list) {
@@ -117,6 +117,18 @@ class TodoListsService {
                     })
             }
             else
+                // Could not update to cluster. Proceed to update local list.
+                var todoLists = nodesService.getAllButSelf().map(node => {
+                    return axios.get(`${Utils.getUrlForPort(node)}/lists/${id}`)
+                })
+
+                Promise.all(todoLists)
+                    .then(todoLists => {
+                        var groupedLists = Utils.groupBy(todoLists.map(todoList => {return todoList.data}), "title")
+                        var quorumList = Object.entries(groupedLists).sort((a, b) => {a[1].length < b[1].length})[0][1][0]
+                        listRepository.updateToDoList(id, quorumList)
+                    })
+
                 return {
                     isOk: false,
                     message: "Unable to update list because is being modified by another user"
