@@ -118,7 +118,7 @@ class TodoListsService {
             }
             else
                 Utils.log(`Could not update list ${id} to cluster. Will update local list`);
-                
+
                 var todoLists = nodesService.getAllButSelf().map(node => {
                     return axios.get(`${Utils.getUrlForPort(node)}/lists/${id}`)
                 })
