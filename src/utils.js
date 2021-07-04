@@ -13,6 +13,23 @@ class Utils {
         console.log(`${Utils.getCurrentTime()} >> ${message}`)
     }
 
+    /**
+     * Receives an array of objects and groups-by a given object key.
+     * Returns an new object consisting of the grouped objects.
+     *
+     * Example of a group-by title:
+     * [
+     *     {id: 1, title: A},
+     *     {id: 2, title: B},
+     *     {id: 3, title: A}
+     * ]
+     *
+     * Returns:
+     * {
+     *     A: [{id: 1, title: A}, {id: 3, title: A}],
+     *     B: [{id: 2, title: B}]
+     * }
+     */
     static groupBy(array, key) {
         return array.reduce((acc, obj) => {
         const property = obj[key];
