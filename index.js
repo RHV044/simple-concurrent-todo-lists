@@ -59,7 +59,10 @@ const server = app.listen(port, () => {
 });
 
 // Gracefull stop by listening to Signal Interruption (ctrl+c)
-process.on('SIGINT', function () {
+process.on('SIGINT', shutdown());
+process.on('SIGTERM', shutdown());
+
+function shutdown(){
     Utils.log("Gracefully shutting down node...");
     axios
     .delete(`${Utils.getUrlForPort(Config.getRegistryPort())}/node/${Config.selfPort}`)
@@ -76,6 +79,4 @@ process.on('SIGINT', function () {
             process.exit();
         }
     );
-
-   
-});
+}
