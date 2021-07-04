@@ -111,7 +111,8 @@ class TodoListsService {
                 return this.ok(list)
             }
             else
-                // Could not update to cluster. Proceed to update local list.
+                Utils.log(`Could not update list ${id} to cluster. Will update local list`);
+                
                 var todoLists = nodesService.getAllButSelf().map(node => {
                     return axios.get(`${Utils.getUrlForPort(node)}/lists/${id}`)
                 })
@@ -121,6 +122,9 @@ class TodoListsService {
                         var groupedLists = Utils.groupBy(todoLists.map(todoList => {return todoList.data}), "title")
                         var quorumList = Object.entries(groupedLists).sort((a, b) => {a[1].length < b[1].length})[0][1][0]
                         listRepository.updateToDoList(id, quorumList)
+                    })
+                    .catch(error => {
+                        Utils.log(`Error reading from quorum for list ${id}`, error.response.data)
                     })
 
                 return {
