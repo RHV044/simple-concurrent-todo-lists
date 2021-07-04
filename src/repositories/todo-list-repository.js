@@ -19,6 +19,16 @@ class TodoListRepository {
     }
 
     /** Updates list on commit  */
+    updateToDoList(id, toDoList) {
+        // Updates the whole ToDoList
+        var toDo = this.findList(id)
+        toDo.title = toDoList.title
+        toDo.availability = toDoList.availability
+        toDo.creator = toDoList.creator
+        toDo.hashVersion = toDoList.hashVersion
+        toDo.list = toDoList.list
+    }
+
     updateList(id, list) {
         this.findList(id).list = list
     }
