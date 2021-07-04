@@ -179,18 +179,31 @@ class TodoListsService {
         });
     }
 
-    askAvailability(node, listId) {
+    askAvailability(node, listId, retriesOnFailure = 3) {
         return axios.patch(`${Utils.getUrlForPort(node)}/lists/${listId}/availability`)
             .then(response => {
-                return { isAvailable: response.data.isAvailable, node: node }
+                return { isAvailable: response.data?.isAvailable, node: node }
             })
-            .catch(error => {
-                Utils.log(`Error checking availability on node ${node} for list ${listId}`,
-                    error.response.data);
-                return { isAvailable: false, node: node } // TODO: Check if we want to retry.
+            .catch(async error => {
+
+                if (retriesOnFailure === 0) {
+                    Utils.log(`Error checking availability on node ${node} for list ${listId}`,
+                        error.response.data);
+                    Utils.log(`No retries left.`);
+                    return { isAvailable: false, node: node }
+                }
+                else {
+                    Utils.log(`Error checking availability on node ${node} for list ${listId}`, error.response.data);
+                    Utils.log(`Retrying again in 5 seconds. ${retries} retries left`);
+                    await new Promise(tick => setTimeout(tick, 5000))
+                    Utils.log(`Retrying...`);
+                    var retries = retriesOnFailure - 1;
+                    this.askAvailability(node, listId, retries);
+                }
+
             })
     }
-
+    
     commitList(node, listId, list) {
         // If the listId is present, then we update a current list, if not, then we create it.
         if (listId) {
