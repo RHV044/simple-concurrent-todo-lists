@@ -1,4 +1,4 @@
-const {default: axios} = require('axios');
+const { default: axios } = require('axios');
 const TodoListRepository = require('../repositories/todo-list-repository')
 const NodesService = require("./nodes-service");
 const listRepository = new TodoListRepository([]) // TODO: receive lists when starting the app and send it to repository
@@ -8,6 +8,10 @@ const Utils = require('../utils');
 class TodoListsService {
 
     // ---------------------- REPOSITORY SERVICES ----------------------//
+
+    get() {
+        return listRepository.get();
+    }
 
     checkAndSetAvailability(id) {
         return listRepository.checkAndSetAvailability(id);
@@ -98,13 +102,15 @@ class TodoListsService {
         return this.checkAvailability(id).then(quorumAvailability => {
             if (quorumAvailability.hasQuorum) {
                 // Apply the action to the list locally
-                let updatedList = action()
+                let updatedTodoList = action()
 
                 // After we updated the local list, we commit the change to the nodes that agreed 
                 // with the new change. Also, we unlock the list locally.
-                let list = this.commitToNodes(quorumAvailability.nodesSaidYes, id, updatedList)
-
-                return this.ok(list)
+                return this.commitToNodes(quorumAvailability.nodesSaidYes, id, updatedTodoList.list)
+                    .then((updatedList) => {
+                        updatedTodoList.list = updatedList
+                        return this.ok(updatedTodoList)
+                    })
             }
             else
                 return {
@@ -144,6 +150,12 @@ class TodoListsService {
     checkAvailability(id) {
         if (listRepository.checkAndSetAvailability(id)) {
             let checkNodesAvailability = nodesService.getAllButSelf().map(node => this.askAvailability(node, id));
+            if (checkNodesAvailability.length == 0) {
+                return Promise.resolve({
+                    hasQuorum: true,
+                    nodesSaidYes: []
+                });
+            }
             const requiredQuorum = Math.floor(nodesService.get().length / 2)
             return Promise.all(checkNodesAvailability)
                 .then(responses => responses.filter(response => response.isAvailable).map(response => response.node))
@@ -166,19 +178,19 @@ class TodoListsService {
                 return { isAvailable: response.data.isAvailable, node: node }
             })
             .catch(error => {
-                Utils.log(`Error checking availability on node ${node} for list ${listId}`, 
-                          error.response.data);
+                Utils.log(`Error checking availability on node ${node} for list ${listId}`,
+                    error.response.data);
                 return { isAvailable: false, node: node } // TODO: Check if we want to retry.
             })
     }
 
     commitList(node, listId, list) {
         // If the listId is present, then we update a current list, if not, then we create it.
-        if(listId) {
+        if (listId) {
             return axios.put(`${Utils.getUrlForPort(node)}/lists/${listId}/commit`, { list: list })
                 .catch(error => {
-                    Utils.log(`Error commiting updated list on node ${node} for list ${listId}`, 
-                            error.response.data);
+                    Utils.log(`Error commiting updated list on node ${node} for list ${listId}`,
+                        error.response.data);
                 })
         }
         return axios.post(`${Utils.getUrlForPort(node)}/lists/commit`, { list: list })

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="css/font-awesome.min.css">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="css/index.css">
+
+  <title>To-do lists!</title>
+</head>
+
+<body>
+  <div class="page-content page-container" id="page-content">
+    <div class="padding">
+      <div class="container d-flex header-container">
+        <div class="col-lg-4">
+          <input id="todo-list-title" type="text" class="form-control todo-list-input" placeholder="Título de la lista">
+        </div>
+        <div class="col-lg-4">
+          <button onclick="addTodoList()"
+            class="add btn btn-secondary font-weight-bold todo-list-add-btn">
+            Agregar todo list
+          </button>
+        </div>
+        <div class="col-lg-4 alignment-right">
+          Vos sos <b id="user-name"></b>
+        </div>
+      </div>
+      <div id="todo-lists-container" class="container d-flex todo-lists-container"></div>
+      <div aria-live="polite" aria-atomic="true">
+        <div id="toast-error" class="toast toast-danger" style="position: absolute; top: 30px; right: 30px;">
+          <div class="toast-header">
+            <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+            <strong class="mr-auto"id="toast-error-title" ></strong>
+          </div>
+          <div id="toast-error-message" class="toast-body"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script src="js/animals.js"></script>
+  <script src="js/todo-list.js"></script>
+  <script src="js/index.js"></script>
+</body>
+
+</html>

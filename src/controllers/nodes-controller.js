@@ -2,6 +2,7 @@ const express = require('express');
 const NodesService = require('../services/nodes-service');
 const nodesService = new NodesService();
 const router = express.Router();
+let index = 0;
 
 /** 
  * GET /node
@@ -10,6 +11,18 @@ const router = express.Router();
  */
 router.get('/', (_, res) => {
     return res.json({ status: 'ok', ports: nodesService.get() });
+});
+
+/** 
+ * GET /node/any
+ * 
+ * Returns any available nodes port.
+ */
+router.get('/any', (_, res) => {
+    const theIndex = index;
+    const ports = nodesService.get();
+    index = index + 1 < ports.length ? index + 1 : 0;
+    return res.json({ status: 'ok', port: ports[theIndex] });
 });
 
 /** 
