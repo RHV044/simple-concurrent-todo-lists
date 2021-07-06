@@ -55,9 +55,9 @@ class TodoListRepository {
         return this.updatedList(todoList)
     }
 
-    updatedList(list) {
-        list.hashVersion = Utils.generateRandomHash();
-        return list;
+    updatedList(todoList) {
+        todoList.hashVersion = Utils.generateListHash(todoList.list);
+        return todoList;
     }
 
     /** Checks whether the list is blocked or not and blocks/unblocks it.

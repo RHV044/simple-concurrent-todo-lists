@@ -5,7 +5,7 @@ class TodoList {
         this.title = title
         this.creator = creator
         this.list = []
-        this.hashVersion = Utils.generateRandomHash()
+        this.hashVersion = Utils.generateListHash([])
         this.availability = true
     }
 }

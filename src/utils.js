@@ -14,8 +14,16 @@ class Utils {
         console.log(`${Utils.getCurrentTime()} >> ${message}`)
     }
 
-    static generateRandomHash() {
-        return crypto.randomBytes(20).toString('hex');
+    static generateListHash(list) {
+        const stringList = JSON.stringify(list);
+        var listHash = 0, i, char;
+
+        for (i = 0; i < stringList.length; i++) {
+          char = stringList.charCodeAt(i);
+          listHash = ((listHash << 5) - listHash) + char;
+          listHash |= 0; // Convert to 32bit integer
+        }
+        return listHash;
     }
 }
 
