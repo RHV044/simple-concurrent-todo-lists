@@ -25,7 +25,9 @@ class TodoListRepository {
 
     addItem(id, item) {
         const todoList = this.findList(id)
+        console.log('v0', todoList)
         todoList.list.push(item)
+        console.log('v1', todoList)
         return this.updatedList(todoList)
     }
 
@@ -57,6 +59,7 @@ class TodoListRepository {
 
     updatedList(todoList) {
         todoList.hashVersion = Utils.generateListHash(todoList.list);
+        console.log('v3',todoList)
         return todoList;
     }
 

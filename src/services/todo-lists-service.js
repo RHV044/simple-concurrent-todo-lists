@@ -99,7 +99,7 @@ class TodoListsService {
         // Check the list hash version for front-end concurrency conflicts 
         if (listRepository.findList(id).hashVersion != hash) {
             Utils.log("Error updating the list, invalid list hash version")
-            return this.error("Unable to update list because it's an older version. Please reload the page.")
+            return Promise.resolve(this.error("Unable to update list because it's an older version. Please reload the page."))
         }
         
         return this.checkAvailability(id).then(quorumAvailability => {
