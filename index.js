@@ -8,6 +8,7 @@ const Config = require('./src/config');
 const healthCheckController = require('./src/controllers/health-check-controller');
 const todoListsController = require('./src/controllers/todo-lists-controller');
 const nodeController = require('./src/controllers/nodes-controller');
+const TodoListsService = require('./src/services/todo-lists-service');
 
 const ClusterPortsRepository = require('./src/repositories/cluster-ports-repository');
 
@@ -50,6 +51,9 @@ const server = app.listen(port, () => {
             (response) => {
                 ClusterPortsRepository.getInstance().addAll(response.data.ports);
                 Utils.log(`Success initialization on registry. Available nodes are: ${ClusterPortsRepository.getInstance().list()}`);
+
+                Utils.log('Proceeding to update node with all available ToDo Lists...');
+                new TodoListsService().fetchAllLists()
             },
             (error) => {
                 if (error.data) Utils.log(error.data);
