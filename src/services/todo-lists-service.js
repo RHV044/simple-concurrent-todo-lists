@@ -23,7 +23,7 @@ class TodoListsService {
     }
 
     fetchAllLists() {
-        const allLists = nodesService.getAllButSelf().flatMap(node => {
+        const allLists = Utils.flatMap(nodesService.getAllButSelf(), node => {
             return axios.get(Utils.getUrlForPort(node) + '/lists/all')
         })
 

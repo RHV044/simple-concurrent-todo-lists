@@ -38,6 +38,11 @@ class Utils {
         return acc;
         }, {});
     }
+
+    static flatMap (func, array) {
+        return Array.prototype
+            .reduce(array, ((acc, elem) => acc.concat(func(elem)), []));
+    }
 }
 
 module.exports = Utils
