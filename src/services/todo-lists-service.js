@@ -22,6 +22,22 @@ class TodoListsService {
         return listRepository.createList(list);
     }
 
+    fetchAllLists() {
+        const allLists = nodesService.getAllButSelf().flatMap(node => {
+            return axios.get(Utils.getUrlForPort(node) + '/lists/all')
+        })
+
+        Promise.all(allLists)
+        .then(allLists => {
+            Object.values(Utils.groupBy(allLists, "id"))
+            .map(toDoLists => {return getQuorumList(toDoLists)})
+            .forEach(toDoList => {TodoListRepository.updateToDoList(toDoList.id, toDoList)})
+        })
+        .catch(error => {
+            Utils.log('Error fetching lists from a node', error.response.data)
+        })
+    }
+
     getList(id) {
         return listRepository.getList(id)
     }
