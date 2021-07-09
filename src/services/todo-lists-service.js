@@ -4,6 +4,7 @@ const NodesService = require("./nodes-service");
 const listRepository = new TodoListRepository() // TODO: receive lists when starting the app and send it to repository
 const nodesService = new NodesService()
 const Utils = require('../utils');
+const { groupBy } = require('../utils');
 
 class TodoListsService {
 
@@ -129,8 +130,7 @@ class TodoListsService {
 
                 Promise.all(todoLists)
                     .then(todoLists => {
-                        var groupedLists = Utils.groupBy(todoLists.map(todoList => {return todoList.data}), "title")
-                        var quorumList = Object.entries(groupedLists).sort((a, b) => {a[1].length < b[1].length})[0][1][0]
+                        var quorumList = this.getQuorumList(todoLists)
                         listRepository.updateToDoList(id, quorumList)
                     })
                     .catch(error => {
@@ -142,6 +142,13 @@ class TodoListsService {
                     message: "Unable to update list because is being modified by another user"
                 }
         })
+    }
+
+    getQuorumList(todoLists) {
+        var groupedToDoLists = Utils.groupBy(todoLists.map(todoList => {return todoList.data}), "title")
+        return Object.entries(groupedToDoLists)
+            .map(groupsList => {return groupsList[1]})
+            .sort((toDos1, toDos2) => {return toDos1.length < toDos2.length})[0][0]
     }
 
     commitToNodes(nodes, id, list) {
