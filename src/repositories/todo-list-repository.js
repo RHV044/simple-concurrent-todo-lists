@@ -2,8 +2,8 @@ const TodoList = require('../model/todoList');
 
 class TodoListRepository {
 
-    constructor(elements) {
-        this.lists = elements
+    constructor() {
+        this.lists = []
         this.index = 0
     }
 

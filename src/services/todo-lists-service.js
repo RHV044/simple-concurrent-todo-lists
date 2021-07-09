@@ -1,7 +1,7 @@
 const { default: axios } = require('axios');
 const TodoListRepository = require('../repositories/todo-list-repository')
 const NodesService = require("./nodes-service");
-const listRepository = new TodoListRepository([]) // TODO: receive lists when starting the app and send it to repository
+const listRepository = new TodoListRepository() // TODO: receive lists when starting the app and send it to repository
 const nodesService = new NodesService()
 const Utils = require('../utils');
 
