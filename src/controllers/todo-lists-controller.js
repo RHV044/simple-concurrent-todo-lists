@@ -52,6 +52,17 @@ router.post('/', (req, res) => {
 })
 
 /**
+ * GET /lists/all
+ *
+ * Returns the specified list
+ */
+ router.get('/all', (req, res) => {
+
+    const list = listsService.getAllLists()
+    res.status(200).json(list)
+})
+
+/**
  * PATCH /lists/:id/availability
  *
  * Returns whether the list is available and then blocks it.
