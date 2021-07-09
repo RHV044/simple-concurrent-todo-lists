@@ -7,6 +7,13 @@ class TodoListRepository {
         this.index = 0
     }
 
+    static getInstance() {
+        if (!TodoListRepository.instance) {
+            TodoListRepository.instance = new TodoListRepository();
+        }
+        return TodoListRepository.instance;
+    }
+
     get() {
         return this.lists;
     }
