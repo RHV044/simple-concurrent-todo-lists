@@ -1,7 +1,7 @@
 const { default: axios } = require('axios');
 const TodoListRepository = require('../repositories/todo-list-repository')
 const NodesService = require("./nodes-service");
-const listRepository = new TodoListRepository() // TODO: receive lists when starting the app and send it to repository
+const listRepository = TodoListRepository.getInstance()
 const nodesService = new NodesService()
 const Utils = require('../utils');
 const { groupBy } = require('../utils');
@@ -23,19 +23,24 @@ class TodoListsService {
     }
 
     fetchAllLists() {
-        const allLists = Utils.flatMap(nodesService.getAllButSelf(), node => {
-            return axios.get(Utils.getUrlForPort(node) + '/lists/all')
+        const allListsResponse = Utils.flatMap(nodesService.getAllButSelf(), node => {
+            return axios.get(Utils.getUrlForPort(node) + '/lists/all');
         })
 
-        Promise.all(allLists)
-        .then(allLists => {
-            Object.values(Utils.groupBy(allLists, "id"))
-            .map(toDoLists => {return getQuorumList(toDoLists)})
-            .forEach(toDoList => {TodoListRepository.updateToDoList(toDoList.id, toDoList)})
-        })
-        .catch(error => {
-            Utils.log('Error fetching lists from a node', error.response.data)
-        })
+        Promise.all(allListsResponse)
+            .then(allListsResponse => {
+                var allLists = Utils.flatMap(allListsResponse, response => {return response.data})
+
+                listRepository.addAll(
+                    Object.values(Utils.groupBy(allLists, "id"))
+                        .map(toDoLists => {return this.getQuorumList(toDoLists)})
+                )
+
+                Utils.log('Current lists are: ' + listRepository.getAllLists().map(list => {return list.title}));
+            })
+            .catch(error => {
+                Utils.log('Error fetching lists from a node: ' + error, error)
+            })
     }
 
     getList(id) {
@@ -140,12 +145,13 @@ class TodoListsService {
             else
                 Utils.log(`Could not update list ${id} to cluster. Will update local list`);
 
-                var todoLists = nodesService.getAllButSelf().map(node => {
+                var todoListsResponse = nodesService.getAllButSelf().map(node => {
                     return axios.get(`${Utils.getUrlForPort(node)}/lists/${id}`)
                 })
 
-                Promise.all(todoLists)
-                    .then(todoLists => {
+                Promise.all(todoListsResponse)
+                    .then(todoListsResponse => {
+                        var todoLists = todoListsResponse.map(todoList => {return todoList.data})
                         var quorumList = this.getQuorumList(todoLists)
                         listRepository.updateToDoList(id, quorumList)
                     })
@@ -161,7 +167,7 @@ class TodoListsService {
     }
 
     getQuorumList(todoLists) {
-        var groupedToDoLists = Utils.groupBy(todoLists.map(todoList => {return todoList.data}), "title")
+        var groupedToDoLists = Utils.groupBy(todoLists, "title")
         return Object.entries(groupedToDoLists)
             .map(groupsList => {return groupsList[1]})
             .sort((toDos1, toDos2) => {return toDos1.length < toDos2.length})[0][0]
