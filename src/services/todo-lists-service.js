@@ -171,9 +171,15 @@ class TodoListsService {
 
     getQuorumList(todoLists) {
         var groupedToDoLists = Utils.groupBy(todoLists, "title")
-        return Object.entries(groupedToDoLists)
+
+        var listByQuorum = Object.entries(groupedToDoLists)
             .map(groupsList => {return groupsList[1]})
-            .sort((toDos1, toDos2) => {return toDos1.length < toDos2.length})[0][0]
+            .filter(toDoList => {toDoList.length >= requiredQuorum()})
+
+        if (listByQuorum.length)
+            return listByQuorum
+        else
+            return undefined
     }
 
     commitToNodes(nodes, id, list) {
