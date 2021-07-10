@@ -46,8 +46,8 @@ router.post('/', (req, res) => {
 
     console.log('Called for all lists')
 
-    const list = listsService.getAllLists()
-    res.status(200).json(list)
+    const lists = listsService.getAllLists()
+    res.status(200).json(lists)
 })
 
 /**
