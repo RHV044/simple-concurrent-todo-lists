@@ -4,7 +4,6 @@ const NodesService = require("./nodes-service");
 const listRepository = TodoListRepository.getInstance()
 const nodesService = new NodesService()
 const Utils = require('../utils');
-const { groupBy } = require('../utils');
 
 class TodoListsService {
 
