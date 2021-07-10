@@ -25,6 +25,10 @@ class TodoListRepository {
         return todoList
     }
 
+    addAll(lists) {
+        this.lists = lists
+    }
+
     getList(id) {
         return this.findList(id)
     }
