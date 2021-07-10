@@ -31,7 +31,7 @@ class TodoListsService {
                 var allLists = Utils.flatMap(allListsResponse, response => {return response.data})
 
                 listRepository.addAll(
-                    Object.values(Utils.groupBy(allLists, "id"))
+                    Object.values(Utils.groupBy(allLists.filter(list => {return list != null}), "id"))
                         .map(toDoLists => {return this.getQuorumList(toDoLists)})
                 )
 
@@ -178,10 +178,10 @@ class TodoListsService {
 
         var listByQuorum = Object.entries(groupedToDoLists)
             .map(groupsList => {return groupsList[1]})
-            .filter(toDoList => {toDoList.length >= requiredQuorum()})
+            .filter(toDoList => {return toDoList.length >= this.requiredQuorum()})
 
         if (listByQuorum.length)
-            return listByQuorum
+            return listByQuorum[0][0]
         else
             return undefined
     }
