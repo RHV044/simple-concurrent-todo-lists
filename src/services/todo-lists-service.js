@@ -165,6 +165,10 @@ class TodoListsService {
         })
     }
 
+    requiredQuorum() {
+        return Math.floor(nodesService.get().length / 2)
+    }
+
     getQuorumList(todoLists) {
         var groupedToDoLists = Utils.groupBy(todoLists, "title")
         return Object.entries(groupedToDoLists)
