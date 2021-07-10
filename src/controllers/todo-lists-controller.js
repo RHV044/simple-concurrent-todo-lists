@@ -13,6 +13,21 @@ const listsService = new ListsService()
 router.get('/', (_, res) => res.json(listsService.get()));
 
 /**
+ * GET /lists/:id
+ *
+ * Returns the specified list
+ */
+ router.get('/:id', (req, res) => {
+    const listId = req.params.id
+
+    const list = listsService.getList(listId)
+    if (list)
+        res.status(200).json(list)
+    else
+        res.status(404).json({message: "Couldn't find the list with ID " + listId})
+})
+
+/**
  * POST /lists
  * {
  *   "list": {
@@ -34,35 +49,6 @@ router.post('/', (req, res) => {
         else
             res.status(422).json({ message: "Couldn't create the list." })
     })
-})
-
-
-/**
- * GET /lists/all
- *
- * Returns the specified list
- */
- router.get('/all', (req, res) => {
-
-    console.log('Called for all lists')
-
-    const lists = listsService.getAllLists()
-    res.status(200).json(lists)
-})
-
-/**
- * GET /lists/:id
- *
- * Returns the specified list
- */
- router.get('/:id', (req, res) => {
-    const listId = req.params.id
-
-    const list = listsService.getList(listId)
-    if (list)
-        res.status(200).json(list)
-    else
-        res.status(404).json({message: "Couldn't find the list with ID " + listId})
 })
 
 /**

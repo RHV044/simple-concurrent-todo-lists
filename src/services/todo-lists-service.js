@@ -23,7 +23,7 @@ class TodoListsService {
 
     fetchAllLists() {
         const allListsResponse = Utils.flatMap(nodesService.getAllButSelf(), node => {
-            return axios.get(Utils.getUrlForPort(node) + '/lists/all');
+            return axios.get(Utils.getUrlForPort(node) + '/lists');
         })
 
         Promise.all(allListsResponse)
@@ -35,7 +35,7 @@ class TodoListsService {
                         .map(toDoLists => {return this.getQuorumList(toDoLists)})
                 )
 
-                Utils.log('Current lists are: ' + listRepository.getAllLists().map(list => {return list.title}));
+                Utils.log('Current lists are: ' + this.get().map(list => {return list.title}));
             })
             .catch(error => {
                 Utils.log('Error fetching lists from a node: ' + error, error)
@@ -44,10 +44,6 @@ class TodoListsService {
 
     getList(id) {
         return listRepository.getList(id)
-    }
-
-    getAllLists(id) {
-        return listRepository.getAllLists()
     }
 
     updateAndUnlockList(id, list) {

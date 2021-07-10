@@ -14,10 +14,6 @@ class TodoListRepository {
         return TodoListRepository.instance;
     }
 
-    get() {
-        return this.lists;
-    }
-
     createList(list) {
         const todoList = new TodoList(this.index, list.title, list.creator)
         this.lists.push(todoList)
@@ -30,12 +26,12 @@ class TodoListRepository {
         this.index = this.lists.length
     }
 
-    getList(id) {
-        return this.findList(id)
+    get() {
+        return this.lists;
     }
 
-    getAllLists() {
-        return this.lists
+    getList(id) {
+        return this.findList(id)
     }
 
     updateToDoList(id, toDoList) {
