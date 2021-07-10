@@ -27,6 +27,7 @@ class TodoListRepository {
 
     addAll(lists) {
         this.lists = lists
+        this.index = this.lists.length
     }
 
     getList(id) {
