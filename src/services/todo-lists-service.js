@@ -152,6 +152,10 @@ class TodoListsService {
                     .then(todoListsResponse => {
                         var todoLists = todoListsResponse.map(todoList => {return todoList.data})
                         var quorumList = this.getQuorumList(todoLists)
+
+                        if (!quorumList)
+                            throw `No quorum achieved for list ${id}!`
+
                         listRepository.updateToDoList(id, quorumList)
                     })
                     .catch(error => {
