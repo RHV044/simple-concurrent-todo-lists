@@ -60,45 +60,48 @@ class TodoListsService {
         return this.ok(list);
     }
 
-    performAddItem(listId, item) {
-        return this.performAction(listId, _ => {
+    performAddItem(listHash, listId, item) {
+        return this.performAction(listHash, listId, _ => {
             // We add the item locally
             return this.addItem(listId, item);
         })
     }
 
-    performUpdateItem(listId, index, text) {
-        return this.performAction(listId, _ => {
+    performUpdateItem(listHash, listId, index, text) {
+        return this.performAction(listHash, listId, _ => {
             // We update the text locally
             return this.updateItemText(listId, index, text);
         })
     }
 
-    performUpdateItemDoneStatus(listId, index, isDone) {
-        return this.performAction(listId, _ => {
+    performUpdateItemDoneStatus(listHash, listId, index, isDone) {
+        return this.performAction(listHash, listId, _ => {
             // We update the item ready status locally
             return this.updateItemDoneStatus(listId, index, isDone);
         })
     }
 
-    performUpdateItemPosition(listId, index, newIndex) {
-        return this.performAction(listId, _ => {
+    performUpdateItemPosition(listHash, listId, index, newIndex) {
+        return this.performAction(listHash, listId, _ => {
             // We update the item position locally
             return this.updateItemPosition(listId, index, newIndex);
         })
     }
 
-    performDeleteItem(listId, index) {
-        return this.performAction(listId, _ => {
+    performDeleteItem(listHash, listId, index) {
+        return this.performAction(listHash, listId, _ => {
             // We delete the item locally
             return this.deleteItem(listId, index);
         })
     }
 
-    performAction(id, action) {
-        // If the id is null, it means it is a creation and there is no need to check for availability.
-        if (id == null) return Promise.resolve(this.ok(action(nodesService.getAllButSelf())));
-
+    performAction(hash, id, action) {
+        // Check the list hash version for front-end concurrency conflicts 
+        if (listRepository.findList(id).hashVersion != hash) {
+            Utils.log("Error updating the list, invalid list hash version")
+            return Promise.resolve(this.error("Unable to update list because it's an older version. Please reload the page."))
+        }
+        
         return this.checkAvailability(id).then(quorumAvailability => {
             if (quorumAvailability.hasQuorum) {
                 // Apply the action to the list locally
@@ -113,10 +116,7 @@ class TodoListsService {
                     })
             }
             else
-                return {
-                    isOk: false,
-                    message: "Unable to update list because is being modified by another user"
-                }
+                this.error("Unable to update list because is being modified by another user")
         })
     }
 
@@ -136,6 +136,13 @@ class TodoListsService {
         return {
             isOk: true,
             list: list
+        }
+    }
+
+    error(message) {
+        return {
+            isOk: false,
+            message: message
         }
     }
 
