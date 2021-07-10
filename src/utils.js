@@ -39,9 +39,8 @@ class Utils {
         }, {});
     }
 
-    static flatMap (func, array) {
-        return Array.prototype
-            .reduce(array, ((acc, elem) => acc.concat(func(elem)), []));
+    static flatMap(xs, f) {
+        return xs.reduce((r, x) => r.concat(f(x)), [])
     }
 }
 
