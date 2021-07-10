@@ -36,6 +36,20 @@ router.post('/', (req, res) => {
     })
 })
 
+
+/**
+ * GET /lists/all
+ *
+ * Returns the specified list
+ */
+ router.get('/all', (req, res) => {
+
+    console.log('Called for all lists')
+
+    const list = listsService.getAllLists()
+    res.status(200).json(list)
+})
+
 /**
  * GET /lists/:id
  *
@@ -49,17 +63,6 @@ router.post('/', (req, res) => {
         res.status(200).json(list)
     else
         res.status(404).json({message: "Couldn't find the list with ID " + listId})
-})
-
-/**
- * GET /lists/all
- *
- * Returns the specified list
- */
- router.get('/all', (req, res) => {
-
-    const list = listsService.getAllLists()
-    res.status(200).json(list)
 })
 
 /**
