@@ -168,15 +168,17 @@ class TodoListsService {
         })
     }
 
-    requiredQuorum() {
-        return Math.floor(nodesService.get().length / 2)
+    requiredQuorum(isRead=false) {
+        const nodes = isRead ? nodesService.getAllButSelf() : nodesService.get()
+
+        return Math.floor(nodes.length / 2)
     }
 
     getQuorumList(todoLists) {
         var groupedToDoLists = Utils.groupBy(todoLists, "title")
 
         var listByQuorum = Object.values(groupedToDoLists)
-            .filter(toDoList => {return toDoList.length >= this.requiredQuorum() + 1})
+            .filter(toDoList => {return toDoList.length >= this.requiredQuorum(true) + 1})
 
         if (listByQuorum.length)
             return listByQuorum[0][0]
