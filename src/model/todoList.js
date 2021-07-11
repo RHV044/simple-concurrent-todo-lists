@@ -1,11 +1,11 @@
-
+const Utils = require('../utils');
 class TodoList {
     constructor(id, title, creator) {
         this.id = id
         this.title = title
         this.creator = creator
         this.list = []
-        this.hashVersion = null // TODO: CREATE HASH
+        this.hashVersion = Utils.generateListHash([])
         this.availability = true
     }
 }

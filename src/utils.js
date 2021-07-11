@@ -1,3 +1,4 @@
+var crypto = require('crypto');
 class Utils {
 
     static getUrlForPort(port) {
@@ -41,6 +42,18 @@ class Utils {
 
     static flatMap(xs, f) {
         return xs.reduce((r, x) => r.concat(f(x)), [])
+    }
+
+    static generateListHash(list) {
+        const stringList = JSON.stringify(list);
+        var listHash = 0, i, char;
+
+        for (i = 0; i < stringList.length; i++) {
+          char = stringList.charCodeAt(i);
+          listHash = ((listHash << 5) - listHash) + char;
+          listHash |= 0; // Convert to 32bit integer
+        }
+        return listHash;
     }
 }
 

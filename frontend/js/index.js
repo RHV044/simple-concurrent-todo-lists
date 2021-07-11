@@ -100,6 +100,7 @@ function updateListView(todoList) {
         .replaceAll('{todo_list_task_is_checked}', task.done.toString().toLowerCase() == "true" ? 'true' : 'false')
         .replaceAll('{todo_list_task_index}', index)
         .replaceAll('{todo_list_id}', todoList.id)
+        .replaceAll('{todo_list_hash}', todoList.hashVersion)
         .replaceAll('{todo_list_task_icon_disabled_up}', index + 1 == todoList.list.length ? "disabled-icon-button" : "")
         .replaceAll('{todo_list_task_icon_disabled_down}', index == 0 ? "disabled-icon-button" : "")
         .replaceAll('{todo_list_task}', task.text), ""));
