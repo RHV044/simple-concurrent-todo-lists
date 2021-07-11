@@ -173,7 +173,7 @@ class TodoListsService {
         var groupedToDoLists = Utils.groupBy(todoLists, "title")
 
         var listByQuorum = Object.values(groupedToDoLists)
-            .filter(toDoList => {return toDoList.length >= this.requiredQuorum()})
+            .filter(toDoList => {return toDoList.length >= this.requiredQuorum() + 1})
 
         if (listByQuorum.length)
             return listByQuorum[0][0]
