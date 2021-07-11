@@ -175,7 +175,7 @@ class TodoListsService {
     }
 
     getQuorumList(todoLists) {
-        var groupedToDoLists = Utils.groupBy(todoLists, "title")
+        var groupedToDoLists = Utils.groupBy(todoLists, "hashVersion")
 
         var listByQuorum = Object.values(groupedToDoLists)
             .filter(toDoList => {return toDoList.length >= this.requiredQuorum(true) + 1})
