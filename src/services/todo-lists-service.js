@@ -21,7 +21,7 @@ class TodoListsService {
         return listRepository.createList(list);
     }
 
-    fetchAllLists() {
+    fetchAllListsByQuorum() {
         const allListsResponse = Utils.flatMap(nodesService.getAllButSelf(), node => {
             return axios.get(Utils.getUrlForPort(node) + '/lists');
         })
