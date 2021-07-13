@@ -30,7 +30,7 @@ class TodoListRepository {
         return this.lists;
     }
 
-    updateToDoList(id, toDoList) {
+    updateList(id, todoList) {
         // Updates the whole ToDoList
         var toDo = this.findList(id)
         toDo.title = toDoList.title
@@ -41,7 +41,7 @@ class TodoListRepository {
     }
 
     /** Updates list on commit  */
-    updateList(id, list) {
+    updateItemsList(id, list) {
         this.findList(id).list = list
     }
 
