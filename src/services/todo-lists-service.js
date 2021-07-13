@@ -229,12 +229,12 @@ class TodoListsService {
                     nodesSaidYes: []
                 });
             }
-            const requiredQuorum = Math.floor(nodesService.get().length / 2)
+
             return Promise.all(checkNodesAvailability)
                 .then(responses => responses.filter(response => response.isAvailable).map(response => response.node))
                 .then(nodesAvailable => {
                     return {
-                        hasQuorum: nodesAvailable.length >= requiredQuorum,
+                        hasQuorum: nodesAvailable.length >= this.requiredQuorum(),
                         nodesSaidYes: nodesAvailable
                     }
                 });
