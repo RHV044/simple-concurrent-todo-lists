@@ -34,7 +34,7 @@ class TodoListRepository {
         return this.findList(id)
     }
 
-    updateToDoList(id, toDoList) {
+    updateList(id, todoList) {
         // Updates the whole ToDoList
         var toDo = this.findList(id)
         toDo.title = toDoList.title
