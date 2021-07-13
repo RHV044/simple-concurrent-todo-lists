@@ -12,7 +12,7 @@ function updateLists() {
         .then((response) => response.forEach((todoList) => {
             if ($(`#todo-list-hash-${todoList.id}`).length == 0) {
                 addListView(todoList);
-            } else if (getTodoListHash(todoList.id) != todoList.hashVersion) {
+            } else if (getTodoListHash(todoList.id) != generateListHash(todoList.list)) {
                 // TODO: test it when hash is implemented. It's working now because "null" != null so it's updating always :)
                 updateListView(todoList);
             }
@@ -87,20 +87,20 @@ function moveTask(listId, taskIndex, plusIndex) {
 function addListView(todoList) {
     $('#todo-lists-container').append(TODO_LIST_HTML
         .replaceAll('{todo_list_title}', todoList.title)
-        .replaceAll('{todo_list_hash}', todoList.hashVersion)
+        .replaceAll('{todo_list_hash}', generateListHash(todoList.list))
         .replaceAll('{todo_list_id}', todoList.id));
     if (todoList.list && todoList.list.length > 0) updateListView(todoList);
 }
 
 function updateListView(todoList) {
-    $(`#todo-list-hash-${todoList.id}`).val(todoList.hashVersion);
+    $(`#todo-list-hash-${todoList.id}`).val(generateListHash(todoList.list));
     $(`#todo-list-container-${todoList.id} .todo-list`).html(todoList.list.filter((task) => task != null).reduce((acc, task, index) => acc + TODO_LIST_TASK_HTML
         .replaceAll('{todo_list_task_completed}', task.done.toString().toLowerCase() == "true" ? 'completed' : '')
         .replaceAll('{todo_list_task_checked}', task.done.toString().toLowerCase() == "true" ? 'checked' : '')
         .replaceAll('{todo_list_task_is_checked}', task.done.toString().toLowerCase() == "true" ? 'true' : 'false')
         .replaceAll('{todo_list_task_index}', index)
         .replaceAll('{todo_list_id}', todoList.id)
-        .replaceAll('{todo_list_hash}', todoList.hashVersion)
+        .replaceAll('{todo_list_hash}', generateListHash(todoList.list))
         .replaceAll('{todo_list_task_icon_disabled_up}', index + 1 == todoList.list.length ? "disabled-icon-button" : "")
         .replaceAll('{todo_list_task_icon_disabled_down}', index == 0 ? "disabled-icon-button" : "")
         .replaceAll('{todo_list_task}', task.text), ""));
@@ -134,4 +134,18 @@ function showErrorAndPerformUpdate(title, message) {
     $("#toast-error-message").html(message);
     $('#toast-error').toast('show');
     updateLists(); // Do this here because one of the most probable reasons of the error is that the list is not updated
+}
+
+
+
+function generateListHash(list) {
+    const stringList = JSON.stringify(list);
+    var listHash = 0, i, char;
+
+    for (i = 0; i < stringList.length; i++) {
+      char = stringList.charCodeAt(i);
+      listHash = ((listHash << 5) - listHash) + char;
+      listHash |= 0; // Convert to 32bit integer
+    }
+    return listHash;
 }

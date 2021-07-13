@@ -78,7 +78,6 @@ class TodoListRepository {
     }
 
     updatedList(todoList) {
-        todoList.hashVersion = Utils.generateListHash(todoList.list);
         return todoList;
     }
 
