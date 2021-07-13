@@ -2,13 +2,16 @@ const TodoList = require('../model/todoList');
 const Utils = require('../utils');
 class TodoListRepository {
 
-    constructor(elements) {
-        this.lists = elements
+    constructor() {
+        this.lists = []
         this.index = 0
     }
 
-    get() {
-        return this.lists;
+    static getInstance() {
+        if (!TodoListRepository.instance) {
+            TodoListRepository.instance = new TodoListRepository();
+        }
+        return TodoListRepository.instance;
     }
 
     createList(list) {
@@ -18,8 +21,27 @@ class TodoListRepository {
         return todoList
     }
 
+    addAll(lists) {
+        this.lists = lists
+        this.index = this.lists.length
+    }
+
+    get() {
+        return this.lists;
+    }
+
+    updateList(id, todoList) {
+        // Updates the whole ToDoList
+        var toDo = this.findList(id)
+        toDo.title = toDoList.title
+        toDo.availability = toDoList.availability
+        toDo.creator = toDoList.creator
+        toDo.hashVersion = toDoList.hashVersion
+        toDo.list = toDoList.list
+    }
+
     /** Updates list on commit  */
-    updateList(id, list) {
+    updateItemsList(id, list) {
         this.findList(id).list = list
     }
 
@@ -55,9 +77,9 @@ class TodoListRepository {
         return this.updatedList(todoList)
     }
 
-    updatedList(list) {
-        list.hashVersion = Utils.generateRandomHash();
-        return list;
+    updatedList(todoList) {
+        todoList.hashVersion = Utils.generateListHash(todoList.list);
+        return todoList;
     }
 
     /** Checks whether the list is blocked or not and blocks/unblocks it.
