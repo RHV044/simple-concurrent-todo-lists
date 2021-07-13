@@ -62,4 +62,25 @@ const server = app.listen(port, () => {
         );
 });
 
-// TODO: add gracefull close
+// Gracefull stop by listening to Signal Interruption (ctrl+c)
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
+
+function shutdown(){
+    Utils.log("Gracefully shutting down node...");
+    axios
+    .delete(`${Utils.getUrlForPort(Config.getRegistryPort())}/node/${Config.selfPort}`)
+    .then(
+        (response) => {
+            if(response.data.status === "ok") Utils.log("Self removed from registry successfully");
+            else Utils.log(JSON.stringify(response.data));
+            Utils.log("Goodbye!");
+            process.exit();
+        },
+        (error) => {
+            if (error.data) Utils.log(error.data);
+            Utils.log("Unable to update registry, shutting down anyway =(");
+            process.exit();
+        }
+    );
+}
