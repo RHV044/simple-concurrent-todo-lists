@@ -31,8 +31,14 @@ class TodoListsService {
                 var allLists = Utils.flatMap(allListsResponse, response => {return response.data})
 
                 listRepository.addAll(
+
+                    /**
+                     * filter any possibly null list from the data, group all lists by their ID,
+                     * then return the quorumed list for each group
+                     */
                     Object.values(Utils.groupBy(allLists.filter(list => {return list != null}), "id"))
                         .map(toDoLists => {return this.getQuorumList(toDoLists)})
+                        // TODO: how to handle? .filter(toDoList => {toDoList != undefined})
                 )
 
                 Utils.log('Current lists are: ' + this.get().map(list => {return list.title}));
