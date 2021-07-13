@@ -33,11 +33,10 @@ class TodoListRepository {
     updateList(id, todoList) {
         // Updates the whole ToDoList
         var toDo = this.findList(id)
-        toDo.title = toDoList.title
-        toDo.availability = toDoList.availability
-        toDo.creator = toDoList.creator
-        toDo.hashVersion = toDoList.hashVersion
-        toDo.list = toDoList.list
+        toDo.title = todoList.title
+        toDo.availability = todoList.availability
+        toDo.creator = todoList.creator
+        toDo.list = todoList.list
     }
 
     /** Updates list on commit  */
@@ -47,6 +46,7 @@ class TodoListRepository {
 
     addItem(id, item) {
         const todoList = this.findList(id)
+        console.log("REPOSITORY", todoList, item)
         todoList.list.push(item)
         return this.updatedList(todoList)
     }

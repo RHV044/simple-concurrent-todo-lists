@@ -49,15 +49,18 @@ class TodoListsService {
     }
 
     getList(id) {
-        return listRepository.getList(id)
+        console.log("GET LIST", id,listRepository.findList(id))
+        return listRepository.findList(id)
     }
 
     updateAndUnlockList(id, list) {
+        console.log("Update and unlock", id, list)
         listRepository.updateList(id, list);
         listRepository.checkAndSetAvailability(id, true);
     }
 
     addItem(id, item) {
+        console.log("SERVICE", id, item)
         return listRepository.addItem(id, item);
     }
 
@@ -92,6 +95,7 @@ class TodoListsService {
     }
 
     performAddItem(listHash, listId, item) {
+        console.log("PERFORM ADD ITEM", listHash, listId, item)
         return this.performAction(listHash, listId, _ => {
             // We add the item locally
             return this.addItem(listId, item);
@@ -134,6 +138,7 @@ class TodoListsService {
         }
         
         return this.checkAvailability(id).then(quorumAvailability => {
+            console.log("Has quorum?", quorumAvailability)
             if (quorumAvailability.hasQuorum) {
                 // Apply the action to the list locally
                 let updatedTodoList = action()
@@ -141,7 +146,7 @@ class TodoListsService {
                 // After we updated the local list, we commit the change to the nodes that agreed 
                 // with the new change. Also, we unlock the list locally.
                 return this.commitToNodes(quorumAvailability.nodesSaidYes, id, updatedTodoList.list)
-                    .then((updatedList) => {
+                .then((updatedList) => {
                         updatedTodoList.list = updatedList
                         return this.ok(updatedTodoList)
                     })
@@ -181,6 +186,7 @@ class TodoListsService {
     }
 
     getQuorumList(todoLists) {
+        todoLists.forEach((todoList) => todoList.hashVersion = todoList.hashVersion());
         var groupedToDoLists = Utils.groupBy(todoLists, "hashVersion")
 
         var listByQuorum = Object.values(groupedToDoLists)
@@ -193,6 +199,7 @@ class TodoListsService {
     }
 
     commitToNodes(nodes, id, list) {
+        console.log("Commiting", nodes, id, list)
         let committedListsToNodes = nodes.map(node => this.commitList(node, id, list))
 
         return Promise.all(committedListsToNodes)
@@ -254,7 +261,7 @@ class TodoListsService {
     askAvailability(node, listId, retriesOnFailure = 3) {
         return axios.patch(`${Utils.getUrlForPort(node)}/lists/${listId}/availability`)
             .then(response => {
-                return { isAvailable: response.data?.isAvailable, node: node }
+                return { isAvailable: response.data && response.data.isAvailable, node: node }
             })
             .catch(async error => {
 
