@@ -45,7 +45,7 @@ class TodoListRepository {
     }
 
     /** Updates list on commit  */
-    updateList(id, list) {
+    updateItemsList(id, list) {
         this.findList(id).list = list
     }
 
