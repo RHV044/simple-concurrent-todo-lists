@@ -30,37 +30,27 @@ class TodoListRepository {
         return this.lists;
     }
 
-    updateList(id, todoList) {
-        // Updates the whole ToDoList
-        var toDo = this.findList(id)
-        toDo.title = todoList.title
-        toDo.availability = todoList.availability
-        toDo.creator = todoList.creator
-        toDo.list = todoList.list
-    }
-
     /** Updates list on commit  */
-    updateItemsList(id, list) {
+    updateList(id, list) {
         this.findList(id).list = list
     }
 
     addItem(id, item) {
         const todoList = this.findList(id)
-        console.log("REPOSITORY", todoList, item)
         todoList.list.push(item)
-        return this.updatedList(todoList)
+        return todoList;
     }
 
     updateItemText(id, index, text) {
         const todoList = this.findList(id)
         todoList.list[index].text = text
-        return this.updatedList(todoList)
+        return todoList;
     }
 
     updateItemDoneStatus(id, index, done) {
         const todoList = this.findList(id)
         todoList.list[index].done = done
-        return this.updatedList(todoList)
+        return todoList;
     }
 
     updateItemPosition(id, index, newIndex) {
@@ -68,16 +58,12 @@ class TodoListRepository {
         const element = todoList.list[index];
         todoList.list.splice(index, 1);
         todoList.list.splice(newIndex, 0, element);
-        return this.updatedList(todoList)
+        return todoList;
     }
 
     deleteItem(id, index) {
         const todoList = this.findList(id)
         todoList.list.splice(index, 1)
-        return this.updatedList(todoList)
-    }
-
-    updatedList(todoList) {
         return todoList;
     }
 

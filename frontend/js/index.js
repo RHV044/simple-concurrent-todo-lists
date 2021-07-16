@@ -7,7 +7,6 @@ $(document).ready(function () {
 });
 
 function updateLists() {
-    console.log("Updating lists");
     doBackendApiCall("GET", "lists")
         .then((response) => response.forEach((todoList) => {
             if ($(`#todo-list-hash-${todoList.id}`).length == 0) {

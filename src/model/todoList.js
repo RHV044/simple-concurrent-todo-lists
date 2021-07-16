@@ -6,10 +6,7 @@ class TodoList {
         this.creator = creator
         this.list = []
         this.availability = true
-    }
-
-    hashVersion() {
-        return Utils.generateListHash(this.list);
+        this.hash = null
     }
 }
 

@@ -49,18 +49,15 @@ class TodoListsService {
     }
 
     getList(id) {
-        console.log("GET LIST", id,listRepository.findList(id))
         return listRepository.findList(id)
     }
 
     updateAndUnlockList(id, list) {
-        console.log("Update and unlock", id, list)
         listRepository.updateList(id, list);
         listRepository.checkAndSetAvailability(id, true);
     }
 
     addItem(id, item) {
-        console.log("SERVICE", id, item)
         return listRepository.addItem(id, item);
     }
 
@@ -95,7 +92,6 @@ class TodoListsService {
     }
 
     performAddItem(listHash, listId, item) {
-        console.log("PERFORM ADD ITEM", listHash, listId, item)
         return this.performAction(listHash, listId, _ => {
             // We add the item locally
             return this.addItem(listId, item);
@@ -131,14 +127,14 @@ class TodoListsService {
     }
 
     performAction(hash, id, action) {
-        // Check the list hash version for front-end concurrency conflicts 
-        if (listRepository.findList(id).hashVersion() != hash) {
+        // Check the list hash version for front-end concurrency conflicts
+        let todoList = listRepository.findList(id)
+        if (Utils.generateListHash(todoList.list) != hash) {
             Utils.log("Error updating the list, invalid list hash version")
             return Promise.resolve(this.error("Unable to update list because it's an older version. Please reload the page."))
         }
         
         return this.checkAvailability(id).then(quorumAvailability => {
-            console.log("Has quorum?", quorumAvailability)
             if (quorumAvailability.hasQuorum) {
                 // Apply the action to the list locally
                 let updatedTodoList = action()
@@ -186,8 +182,10 @@ class TodoListsService {
     }
 
     getQuorumList(todoLists) {
-        todoLists.forEach((todoList) => todoList.hashVersion = todoList.hashVersion());
-        var groupedToDoLists = Utils.groupBy(todoLists, "hashVersion")
+        todoLists.forEach((todoList) => {
+            todoList.hash = Utils.generateListHash(todoList.list)
+        });
+        var groupedToDoLists = Utils.groupBy(todoLists, "hash")
 
         var listByQuorum = Object.values(groupedToDoLists)
             .filter(toDoList => {return toDoList.length >= this.requiredQuorum(true) + 1})
@@ -199,7 +197,6 @@ class TodoListsService {
     }
 
     commitToNodes(nodes, id, list) {
-        console.log("Commiting", nodes, id, list)
         let committedListsToNodes = nodes.map(node => this.commitList(node, id, list))
 
         return Promise.all(committedListsToNodes)
