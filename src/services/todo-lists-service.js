@@ -175,7 +175,7 @@ class TodoListsService {
         })
     }
 
-    requiredQuorum(isRead=false) {
+    requiredQuorum(isRead = false) {
         const nodes = isRead ? nodesService.getAllButSelf() : nodesService.get()
 
         return Math.floor(nodes.length / 2)
@@ -185,10 +185,10 @@ class TodoListsService {
         todoLists.forEach((todoList) => {
             todoList.hash = Utils.generateListHash(todoList.list)
         });
-        var groupedToDoLists = Utils.groupBy(todoLists, "hash")
+        var groupedTodoLists = Utils.groupBy(todoLists, "hash")
 
-        var listByQuorum = Object.values(groupedToDoLists)
-            .filter(toDoList => {return toDoList.length >= this.requiredQuorum(true) + 1})
+        var listByQuorum = Object.values(groupedTodoLists)
+            .filter(todoList => {return todoList.length >= this.requiredQuorum(true) + 1})
 
         if (listByQuorum.length)
             return listByQuorum[0][0]

@@ -6,7 +6,6 @@ class TodoList {
         this.creator = creator
         this.list = []
         this.availability = true
-        this.hash = null
     }
 }
 

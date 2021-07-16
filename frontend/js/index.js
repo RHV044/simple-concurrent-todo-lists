@@ -3,7 +3,7 @@ const USER_NAME = animals[Math.floor(Math.random() * animals.length)];
 $(document).ready(function () {
     $('#user-name').html(USER_NAME);
     updateLists();
-    setInterval(() => updateLists(), 2000); // Check the lists every 10 seconds.
+    setInterval(() => updateLists(), 10000); // Check the lists every 10 seconds.
 });
 
 function updateLists() {
@@ -12,7 +12,6 @@ function updateLists() {
             if ($(`#todo-list-hash-${todoList.id}`).length == 0) {
                 addListView(todoList);
             } else if (getTodoListHash(todoList.id) != generateListHash(todoList.list)) {
-                // TODO: test it when hash is implemented. It's working now because "null" != null so it's updating always :)
                 updateListView(todoList);
             }
         }));
@@ -134,8 +133,6 @@ function showErrorAndPerformUpdate(title, message) {
     $('#toast-error').toast('show');
     updateLists(); // Do this here because one of the most probable reasons of the error is that the list is not updated
 }
-
-
 
 function generateListHash(list) {
     const stringList = JSON.stringify(list);

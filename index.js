@@ -52,7 +52,7 @@ const server = app.listen(port, () => {
                 ClusterPortsRepository.getInstance().addAll(response.data.ports);
                 Utils.log(`Success initialization on registry. Available nodes are: ${ClusterPortsRepository.getInstance().list()}`);
 
-                Utils.log('Proceeding to update node with all available ToDo Lists...');
+                Utils.log('Proceeding to update node with all available TodoLists...');
                 new TodoListsService().fetchAllListsByQuorum()
             },
             (error) => {
