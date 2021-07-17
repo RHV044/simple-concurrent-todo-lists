@@ -28,7 +28,7 @@ class TodoListsService {
 
         Promise.all(allListsResponse)
             .then(allListsResponse => {
-                var allLists = Utils.flatMap(allListsResponse, response => {return response.data})
+                var allLists = Utils.flatMap(allListsResponse, response => { return response.data })
 
                 listRepository.addAll(
 
@@ -36,12 +36,12 @@ class TodoListsService {
                      * filter any possibly null list from the data, group all lists by their ID,
                      * then return the quorumed list for each group
                      */
-                    Object.values(Utils.groupBy(allLists.filter(list => {return list != null}), "id"))
-                        .map(toDoLists => {return this.getQuorumList(toDoLists)})
-                        // TODO: how to handle? .filter(toDoList => {toDoList != undefined})
+                    Object.values(Utils.groupBy(allLists.filter(list => { return list != null }), "id"))
+                        .map(toDoLists => { return this.getQuorumList(toDoLists) })
+                    // TODO: how to handle? .filter(toDoList => {toDoList != undefined})
                 )
 
-                Utils.log('Current lists are: ' + this.get().map(list => {return list.title}));
+                Utils.log('Current lists are: ' + this.get().map(list => { return list.title }));
             })
             .catch(error => {
                 Utils.log('Error fetching lists from a node: ' + error, error)
@@ -133,7 +133,7 @@ class TodoListsService {
             Utils.log("Error updating the list, invalid list hash version")
             return Promise.resolve(this.error("Unable to update list because it's an older version. Please reload the page."))
         }
-        
+
         return this.checkAvailability(id).then(quorumAvailability => {
             if (quorumAvailability.hasQuorum) {
                 // Apply the action to the list locally
@@ -142,12 +142,12 @@ class TodoListsService {
                 // After we updated the local list, we commit the change to the nodes that agreed 
                 // with the new change. Also, we unlock the list locally.
                 return this.commitToNodes(quorumAvailability.nodesSaidYes, id, updatedTodoList.list)
-                .then((updatedList) => {
+                    .then((updatedList) => {
                         updatedTodoList.list = updatedList
                         return this.ok(updatedTodoList)
                     })
             }
-            else
+            else {
                 Utils.log(`Could not update list ${id} to cluster. Will update local list`);
 
                 var todoListsResponse = nodesService.getAllButSelf().map(node => {
@@ -156,7 +156,7 @@ class TodoListsService {
 
                 Promise.all(todoListsResponse)
                     .then(todoListsResponse => {
-                        var todoLists = todoListsResponse.map(todoList => {return todoList.data})
+                        var todoLists = todoListsResponse.map(todoList => { return todoList.data })
                         var quorumList = this.getQuorumList(todoLists)
 
                         if (!quorumList)
@@ -165,13 +165,14 @@ class TodoListsService {
                         listRepository.updateToDoList(id, quorumList)
                     })
                     .catch(error => {
-                        Utils.log(`Error reading from quorum for list ${id}`, error.response.data)
+                        Utils.log(`Error reading from quorum for list ${id}`, error && error.response && error.response.data)
                     })
 
                 return {
                     isOk: false,
                     message: "Unable to update list because is being modified by another user"
                 }
+            }
         })
     }
 
@@ -188,7 +189,7 @@ class TodoListsService {
         var groupedTodoLists = Utils.groupBy(todoLists, "hash")
 
         var listByQuorum = Object.values(groupedTodoLists)
-            .filter(todoList => {return todoList.length >= this.requiredQuorum(true) + 1})
+            .filter(todoList => { return todoList.length >= this.requiredQuorum(true) + 1 })
 
         if (listByQuorum.length)
             return listByQuorum[0][0]
@@ -266,34 +267,34 @@ class TodoListsService {
 
                 if (retriesOnFailure === 0) {
                     Utils.log(`Error checking availability on node ${node} for list ${listId}`,
-                        error.response.data);
+                        error && error.response && error.response.data);
                     Utils.log(`No retries left.`);
                     return { isAvailable: false, node: node }
                 }
                 else {
-                    Utils.log(`Error checking availability on node ${node} for list ${listId}`, error.response.data);
-                    Utils.log(`Retrying again in 5 seconds. ${retries} retries left`);
+                    Utils.log(`Error checking availability on node ${node} for list ${listId}`, error && error.response && error.response.data);
+                    Utils.log(`Retrying again in 5 seconds. ${retriesOnFailure} retries left`);
                     await new Promise(tick => setTimeout(tick, 5000))
                     Utils.log(`Retrying...`);
                     var retries = retriesOnFailure - 1;
-                    this.askAvailability(node, listId, retries);
+                    return this.askAvailability(node, listId, retries);
                 }
 
             })
     }
-    
+
     commitList(node, listId, list) {
         // If the listId is present, then we update a current list, if not, then we create it.
         if (listId) {
             return axios.put(`${Utils.getUrlForPort(node)}/lists/${listId}/commit`, { list: list })
                 .catch(error => {
                     Utils.log(`Error commiting updated list on node ${node} for list ${listId}`,
-                        error.response.data);
+                        error && error.response && error.response.data);
                 })
         }
         return axios.post(`${Utils.getUrlForPort(node)}/lists/commit`, { list: list })
             .catch(error => {
-                Utils.log(`Error commiting the list creation on node ${node}`, error.response.data);
+                Utils.log(`Error commiting the list creation on node ${node}`, error && error.response && error.response.data);
             })
     }
 }

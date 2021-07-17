@@ -9,7 +9,7 @@ gnome-terminal -- npm run startRegistry
 gnome-terminal -- npm start --port 9001
 gnome-terminal -- npm start --port 9002
 gnome-terminal -- npm start --port 9003
-google-chrome --app ./frontend/index.html
+google-chrome ./frontend/index.html
 echo ""
 echo "====================================================="
 read -p "Crea 2 listas vacias, distintas e impactando en nodos distintos... ENTER"
@@ -23,9 +23,9 @@ echo ""
 echo "====================================================="
 read -p "Esto prueba que eliminamos la chance de conflict con el quorum de escritura. Solo se graba en los nodos la primer modificacion... ENTER"
 echo "====================================================="
-curl -H $content -H $hash -X POST -d '{"item":{"text":"dohomework","done":false}}' http://localhost:9001/lists/1/items
-curl -H $content -H $hash -X POST -d '{"item":{"text":"doNOTdohomework","done":false}}' http://localhost:9002/lists/1/items
-curl -H $content -H $hash -X POST -d '{"item":{"text":"doNOTdohomework_ASDA","done":false}}' http://localhost:9003/lists/1/items
+curl -H $content -H $hash -X POST -d '{"item":{"text":"dohomework","done":false}}' http://localhost:9001/lists/1/items &
+#curl -H $content -H $hash -X POST -d '{"item":{"text":"doNOTdohomework","done":false}}' http://localhost:9002/lists/1/items &
+#curl -H $content -H $hash -X POST -d '{"item":{"text":"doNOTdohomework_ASDA","done":false}}' http://localhost:9003/lists/1/items &
 echo ""
 echo "====================================================="
 read -p "Levantamos nodo 9004 y deberia sincronizarse con todo lo de los demas... ENTER"
@@ -49,6 +49,7 @@ echo ""
 echo "====================================================="
 read -p "Agregamos información al cluster... ENTER"
 echo "====================================================="
+hash="x-list-hash:1796987108"
 curl -H $content -H $hash -X POST -d '{"item":{"text":"EstoSeAgregoCon9001Caido","done":true}}' http://localhost:9002/lists/1/items
 
 
