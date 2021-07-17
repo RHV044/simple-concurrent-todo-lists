@@ -41,7 +41,6 @@ router.get('/', (_, res) => res.json(listsService.get()));
  */
 router.post('/', (req, res) => {
     const list = req.body.list
-
     const result = listsService.performCreateList(list)
 
     result.list.then(list => {
@@ -168,7 +167,7 @@ router.post('/commit', (req, res) => {
     const list = listsService.createList(newList)
 
     if (list) {
-        Utils.log("Successful commit: list created")
+        Utils.log("Got commited: list created")
         res.status(204).send()
     } else {
         res.status(422).json({ message: "Couldn't commit the created list." })
@@ -188,7 +187,7 @@ router.put('/:id/commit', (req, res) => {
     const updatedList = req.body.list
 
     listsService.updateAndUnlockList(listId, updatedList)
-    Utils.log("Successful commit: list updated")
+    Utils.log("Got commited: list updated")
     res.status(204).send()
 });
 

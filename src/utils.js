@@ -33,10 +33,10 @@ class Utils {
      */
     static groupBy(array, key) {
         return array.reduce((acc, obj) => {
-        const property = obj[key];
-        acc[property] = acc[property] || [];
-        acc[property].push(obj);
-        return acc;
+            const property = obj[key];
+            acc[property] = acc[property] || [];
+            acc[property].push(obj);
+            return acc;
         }, {});
     }
 
@@ -49,10 +49,11 @@ class Utils {
         var listHash = 0, i, char;
 
         for (i = 0; i < stringList.length; i++) {
-          char = stringList.charCodeAt(i);
-          listHash = ((listHash << 5) - listHash) + char;
-          listHash |= 0; // Convert to 32bit integer
+            char = stringList.charCodeAt(i);
+            listHash = ((listHash << 5) - listHash) + char;
+            listHash |= 0; // Convert to 32bit integer
         }
+        console.log("New Hash Generated: " + listHash + ". For list: \n" + stringList);
         return listHash;
     }
 }

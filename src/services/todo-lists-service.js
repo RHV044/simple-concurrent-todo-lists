@@ -49,7 +49,7 @@ class TodoListsService {
     }
 
     getList(id) {
-        return listRepository.getList(id)
+        return listRepository.findList(id)
     }
 
     updateAndUnlockList(id, list) {
@@ -127,8 +127,9 @@ class TodoListsService {
     }
 
     performAction(hash, id, action) {
-        // Check the list hash version for front-end concurrency conflicts 
-        if (listRepository.findList(id).hashVersion != hash) {
+        // Check the list hash version for front-end concurrency conflicts
+        let todoList = listRepository.findList(id)
+        if (Utils.generateListHash(todoList.list) != hash) {
             Utils.log("Error updating the list, invalid list hash version")
             return Promise.resolve(this.error("Unable to update list because it's an older version. Please reload the page."))
         }
@@ -141,7 +142,7 @@ class TodoListsService {
                 // After we updated the local list, we commit the change to the nodes that agreed 
                 // with the new change. Also, we unlock the list locally.
                 return this.commitToNodes(quorumAvailability.nodesSaidYes, id, updatedTodoList.list)
-                    .then((updatedList) => {
+                .then((updatedList) => {
                         updatedTodoList.list = updatedList
                         return this.ok(updatedTodoList)
                     })
@@ -174,17 +175,20 @@ class TodoListsService {
         })
     }
 
-    requiredQuorum(isRead=false) {
+    requiredQuorum(isRead = false) {
         const nodes = isRead ? nodesService.getAllButSelf() : nodesService.get()
 
         return Math.floor(nodes.length / 2)
     }
 
     getQuorumList(todoLists) {
-        var groupedToDoLists = Utils.groupBy(todoLists, "hashVersion")
+        todoLists.forEach((todoList) => {
+            todoList.hash = Utils.generateListHash(todoList.list)
+        });
+        var groupedTodoLists = Utils.groupBy(todoLists, "hash")
 
-        var listByQuorum = Object.values(groupedToDoLists)
-            .filter(toDoList => {return toDoList.length >= this.requiredQuorum(true) + 1})
+        var listByQuorum = Object.values(groupedTodoLists)
+            .filter(todoList => {return todoList.length >= this.requiredQuorum(true) + 1})
 
         if (listByQuorum.length)
             return listByQuorum[0][0]
@@ -254,7 +258,9 @@ class TodoListsService {
     askAvailability(node, listId, retriesOnFailure = 3) {
         return axios.patch(`${Utils.getUrlForPort(node)}/lists/${listId}/availability`)
             .then(response => {
-                return { isAvailable: response.data?.isAvailable, node: node }
+
+                return { isAvailable: response.data && response.data.isAvailable, node: node }
+
             })
             .catch(async error => {
 
