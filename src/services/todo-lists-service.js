@@ -150,29 +150,35 @@ class TodoListsService {
             else
                 Utils.log(`Could not update list ${id} to cluster. Will update local list`);
 
-                var todoListsResponse = nodesService.getAllButSelf().map(node => {
-                    return axios.get(`${Utils.getUrlForPort(node)}/lists/${id}`)
-                })
-
-                Promise.all(todoListsResponse)
-                    .then(todoListsResponse => {
-                        var todoLists = todoListsResponse.map(todoList => {return todoList.data})
-                        var quorumList = this.getQuorumList(todoLists)
-
-                        if (!quorumList)
-                            throw `No quorum achieved for list ${id}!`
-
-                        listRepository.updateToDoList(id, quorumList)
-                    })
-                    .catch(error => {
-                        Utils.log(`Error reading from quorum for list ${id}`, error.response.data)
-                    })
+                updateListByQuorum(id)
 
                 return {
                     isOk: false,
-                    message: "Unable to update list because is being modified by another user"
+                    message: "Unable to update list because its being modified by another user"
                 }
         })
+    }
+
+    updateListByQuorum(id) {
+
+        var todoListsResponse = nodesService.getAllButSelf().map(node => {
+            return axios.get(`${Utils.getUrlForPort(node)}/lists/${id}`)
+        })
+
+        Promise.all(todoListsResponse)
+            .then(todoListsResponse => {
+                var todoLists = todoListsResponse.map(todoList => {return todoList.data})
+                var quorumList = this.getQuorumList(todoLists)
+
+                if (!quorumList)
+                    throw `No quorum achieved for list ${id}!`
+
+                listRepository.updateToDoList(id, quorumList)
+            })
+            .catch(error => {
+                Utils.log(`Error reading from quorum for list ${id}`, error.response.data)
+                setTimeout(this.updateListByQuorum(), 2000, 0)
+            })
     }
 
     requiredQuorum(isRead = false) {
