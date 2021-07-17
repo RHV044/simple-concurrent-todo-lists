@@ -178,7 +178,7 @@ class TodoListsService {
             })
             .catch(error => {
                 Utils.log(`Error reading from quorum for list ${id}`, error && error.response && error.response.data)
-                setTimeout(this.updateListByQuorum, 2000, id)
+                setTimeout(() => this.updateListByQuorum(id), 2000)
             })
     }
 

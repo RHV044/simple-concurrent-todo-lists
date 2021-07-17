@@ -1,5 +1,17 @@
 #!/bin/bash
 
+shutdown(){
+echo "shutting down..."
+iptables -I INPUT -p tcp --dport 9000 -j ACCEPT
+iptables -I INPUT -p tcp --dport 9001 -j ACCEPT
+iptables -I INPUT -p tcp --dport 9002 -j ACCEPT
+iptables -I INPUT -p tcp --dport 9003 -j ACCEPT
+iptables -I INPUT -p tcp --dport 9004 -j ACCEPT
+exit 0
+}
+
+trap "shutdown" SIGINT
+
 npm install
 echo ""
 echo "====================================================="
@@ -9,7 +21,7 @@ gnome-terminal -- npm run startRegistry
 gnome-terminal -- npm start --port 9001
 gnome-terminal -- npm start --port 9002
 gnome-terminal -- npm start --port 9003
-google-chrome ./frontend/index.html
+#google-chrome ./frontend/index.html
 echo ""
 echo "====================================================="
 read -p "Crea 2 listas vacias, distintas e impactando en nodos distintos... ENTER"
@@ -21,11 +33,17 @@ curl -H $content -H $hash -X POST -d '{"list":{"title":"Listerna","creator":"scr
 
 echo ""
 echo "====================================================="
-read -p "Esto prueba que eliminamos la chance de conflict con el quorum de escritura. Solo se graba en los nodos la primer modificacion... ENTER"
+read -p "Insertamos items en la misma lista desde 2 nodos distintos. Solo un cambio va a ganar quorum, el perdedor se tiene que adaptar... ENTER"
 echo "====================================================="
 curl -H $content -H $hash -X POST -d '{"item":{"text":"dohomework","done":false}}' http://localhost:9001/lists/1/items &
-#curl -H $content -H $hash -X POST -d '{"item":{"text":"doNOTdohomework","done":false}}' http://localhost:9002/lists/1/items &
-#curl -H $content -H $hash -X POST -d '{"item":{"text":"doNOTdohomework_ASDA","done":false}}' http://localhost:9003/lists/1/items &
+curl -H $content -H $hash -X POST -d '{"item":{"text":"doNOTdohomework","done":false}}' http://localhost:9002/lists/1/items &
+echo ""
+echo "====================================================="
+read -p "Insertamos items distintos en todos los nodos (3), por ende ninguno va a ganar quorum, ningun cambio se acepta... ENTER"
+echo "====================================================="
+curl -H $content -H $hash -X POST -d '{"item":{"text":"dohomework","done":false}}' http://localhost:9001/lists/1/items &
+curl -H $content -H $hash -X POST -d '{"item":{"text":"doNOTdohomework","done":false}}' http://localhost:9002/lists/1/items &
+curl -H $content -H $hash -X POST -d '{"item":{"text":"doNOTdohomework_ASDA","done":false}}' http://localhost:9003/lists/1/items &
 echo ""
 echo "====================================================="
 read -p "Levantamos nodo 9004 y deberia sincronizarse con todo lo de los demas... ENTER"
@@ -64,16 +82,17 @@ iptables -I INPUT -p tcp --dport 9001 -j ACCEPT
 
 echo ""
 echo "====================================================="
-read -p "Que pasa si perdemos conexion con el registry 9000 e insertamos datos... ENTER"
+read -p "Que pasa si perdemos conexion con el registry 9000 (no se puede cambiar topologia de red) e insertamos datos... ENTER"
 echo "====================================================="
 iptables -I INPUT -p tcp --dport 9000 -j REJECT
 curl -H $content -H $hash -X POST -d '{"item":{"text":"EstoSeAgregoConElRegistry9000Caido","done":true}}' http://localhost:9004/lists/1/items
 
+echo ""
+echo "====================================================="
+read -p "Con el registry caido, no se pueden agregar Nodos... ENTER"
+echo "====================================================="
+gnome-terminal -- npm start --port 9005
 
 
 
-iptables -I INPUT -p tcp --dport 9000 -j ACCEPT
-iptables -I INPUT -p tcp --dport 9001 -j ACCEPT
-iptables -I INPUT -p tcp --dport 9002 -j ACCEPT
-iptables -I INPUT -p tcp --dport 9003 -j ACCEPT
-iptables -I INPUT -p tcp --dport 9004 -j ACCEPT
+shutdown
