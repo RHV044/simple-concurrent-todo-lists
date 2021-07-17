@@ -171,10 +171,13 @@ class TodoListsService {
                 var todoLists = todoListsResponse.map(todoList => { return todoList.data })
                 var quorumList = this.getQuorumList(todoLists)
 
-                if (!quorumList)
-                    throw `No quorum achieved for list ${id}!`
+                // console.log('This is the quorumed list: ' + JSON.stringify(quorumList))
 
-                listRepository.updateToDoList(id, quorumList)
+                if (!quorumList){
+                    throw `No quorum achieved for list ${id}!`
+                }
+
+                listRepository.updateList(id, quorumList.list)
             })
             .catch(error => {
                 Utils.log(`Error reading from quorum for list ${id}`, error && error.response && error.response.data)
@@ -189,18 +192,27 @@ class TodoListsService {
     }
 
     getQuorumList(todoLists) {
+        // add hash attribute just to group-by later
         todoLists.forEach((todoList) => {
             todoList.hash = Utils.generateListHash(todoList.list)
         });
+        
         var groupedTodoLists = Utils.groupBy(todoLists, "hash")
-
         var listByQuorum = Object.values(groupedTodoLists)
-            .filter(todoList => { return todoList.length >= this.requiredQuorum(true) + 1 })
+            .filter(todoList => {
+                return todoList.length >= this.requiredQuorum(true) + 1
+            })
 
-        if (listByQuorum.length)
-            return listByQuorum[0][0]
-        else
+        if (listByQuorum.length) {
+            const actualList = listByQuorum[0][0]
+
+            // remove previously added hash attribute
+            delete actualList.hash
+            return actualList
+        }
+        else {
             return undefined
+        }
     }
 
     commitToNodes(nodes, id, list) {
