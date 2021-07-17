@@ -258,7 +258,9 @@ class TodoListsService {
     askAvailability(node, listId, retriesOnFailure = 3) {
         return axios.patch(`${Utils.getUrlForPort(node)}/lists/${listId}/availability`)
             .then(response => {
+
                 return { isAvailable: response.data && response.data.isAvailable, node: node }
+
             })
             .catch(async error => {
 
