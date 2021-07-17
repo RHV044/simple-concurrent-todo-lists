@@ -1,7 +1,7 @@
 const { default: axios } = require('axios');
 const TodoListRepository = require('../repositories/todo-list-repository')
 const NodesService = require("./nodes-service");
-const listRepository = new TodoListRepository([]) // TODO: receive lists when starting the app and send it to repository
+const listRepository = TodoListRepository.getInstance()
 const nodesService = new NodesService()
 const Utils = require('../utils');
 
@@ -19,6 +19,37 @@ class TodoListsService {
 
     createList(list) {
         return listRepository.createList(list);
+    }
+
+    fetchAllListsByQuorum() {
+        const allListsResponse = Utils.flatMap(nodesService.getAllButSelf(), node => {
+            return axios.get(Utils.getUrlForPort(node) + '/lists');
+        })
+
+        Promise.all(allListsResponse)
+            .then(allListsResponse => {
+                var allLists = Utils.flatMap(allListsResponse, response => {return response.data})
+
+                listRepository.addAll(
+
+                    /**
+                     * filter any possibly null list from the data, group all lists by their ID,
+                     * then return the quorumed list for each group
+                     */
+                    Object.values(Utils.groupBy(allLists.filter(list => {return list != null}), "id"))
+                        .map(toDoLists => {return this.getQuorumList(toDoLists)})
+                        // TODO: how to handle? .filter(toDoList => {toDoList != undefined})
+                )
+
+                Utils.log('Current lists are: ' + this.get().map(list => {return list.title}));
+            })
+            .catch(error => {
+                Utils.log('Error fetching lists from a node: ' + error, error)
+            })
+    }
+
+    getList(id) {
+        return listRepository.getList(id)
     }
 
     updateAndUnlockList(id, list) {
@@ -116,8 +147,49 @@ class TodoListsService {
                     })
             }
             else
-                this.error("Unable to update list because is being modified by another user")
+                Utils.log(`Could not update list ${id} to cluster. Will update local list`);
+
+                var todoListsResponse = nodesService.getAllButSelf().map(node => {
+                    return axios.get(`${Utils.getUrlForPort(node)}/lists/${id}`)
+                })
+
+                Promise.all(todoListsResponse)
+                    .then(todoListsResponse => {
+                        var todoLists = todoListsResponse.map(todoList => {return todoList.data})
+                        var quorumList = this.getQuorumList(todoLists)
+
+                        if (!quorumList)
+                            throw `No quorum achieved for list ${id}!`
+
+                        listRepository.updateToDoList(id, quorumList)
+                    })
+                    .catch(error => {
+                        Utils.log(`Error reading from quorum for list ${id}`, error.response.data)
+                    })
+
+                return {
+                    isOk: false,
+                    message: "Unable to update list because is being modified by another user"
+                }
         })
+    }
+
+    requiredQuorum(isRead=false) {
+        const nodes = isRead ? nodesService.getAllButSelf() : nodesService.get()
+
+        return Math.floor(nodes.length / 2)
+    }
+
+    getQuorumList(todoLists) {
+        var groupedToDoLists = Utils.groupBy(todoLists, "hashVersion")
+
+        var listByQuorum = Object.values(groupedToDoLists)
+            .filter(toDoList => {return toDoList.length >= this.requiredQuorum(true) + 1})
+
+        if (listByQuorum.length)
+            return listByQuorum[0][0]
+        else
+            return undefined
     }
 
     commitToNodes(nodes, id, list) {
@@ -163,12 +235,12 @@ class TodoListsService {
                     nodesSaidYes: []
                 });
             }
-            const requiredQuorum = Math.floor(nodesService.get().length / 2)
+
             return Promise.all(checkNodesAvailability)
                 .then(responses => responses.filter(response => response.isAvailable).map(response => response.node))
                 .then(nodesAvailable => {
                     return {
-                        hasQuorum: nodesAvailable.length >= requiredQuorum,
+                        hasQuorum: nodesAvailable.length >= this.requiredQuorum(),
                         nodesSaidYes: nodesAvailable
                     }
                 });

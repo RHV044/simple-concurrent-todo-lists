@@ -14,6 +14,21 @@ const listsService = new ListsService()
 router.get('/', (_, res) => res.json(listsService.get()));
 
 /**
+ * GET /lists/:id
+ *
+ * Returns the specified list
+ */
+ router.get('/:id', (req, res) => {
+    const listId = req.params.id
+
+    const list = listsService.getList(listId)
+    if (list)
+        res.status(200).json(list)
+    else
+        res.status(404).json({message: "Couldn't find the list with ID " + listId})
+})
+
+/**
  * POST /lists
  * {
  *   "list": {
