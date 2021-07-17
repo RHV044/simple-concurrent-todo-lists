@@ -150,7 +150,7 @@ class TodoListsService {
             else {
                 Utils.log(`Could not update list ${id} to cluster. Will update local list`);
 
-                updateListByQuorum(id)
+                this.updateListByQuorum(id)
 
                 return {
                     isOk: false,
