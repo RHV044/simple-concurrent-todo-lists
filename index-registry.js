@@ -1,3 +1,4 @@
+const { default: axios } = require('axios');
 const express = require('express');
 const app = new express();
 const nodeController = require('./src/controllers/nodes-controller');
@@ -33,6 +34,7 @@ axios.interceptors.request.use(req => {
     // Important: request interceptors **must** return the request.
     return req;
 });
+Config.setHasInternet(true)
 
 app.use(express.json());
 // Add headers
