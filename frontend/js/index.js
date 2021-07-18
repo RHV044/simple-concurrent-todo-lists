@@ -109,7 +109,8 @@ function doBackendApiCall(type, endpoint, listId = null, body = null) {
     const headers = listHash != null ? { 'X-List-Hash': listHash } : null;
     return askForNode()
         .then((response) => {
-            $.ajax({
+            $('#last-used-port').html(response.port)
+            return $.ajax({
                 url: `http://localhost:${response.port}/${endpoint}`,
                 type: type,
                 headers: headers,
@@ -117,7 +118,6 @@ function doBackendApiCall(type, endpoint, listId = null, body = null) {
                 contentType: "application/json; charset=utf-8",
                 dataType: "json"
             })
-            $('#last-used-port').html(response.port)
         })
 }
 
