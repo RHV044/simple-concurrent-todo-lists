@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Utils = require('../utils');
 const Config = require('../config');
-const simulate = require('simulate-network-conditions') 
-const axios = require('axios');
 
 /** 
  * POST /connection/lost 
