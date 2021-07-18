@@ -9,12 +9,9 @@ const healthCheckController = require('./src/controllers/health-check-controller
 const todoListsController = require('./src/controllers/todo-lists-controller');
 const nodeController = require('./src/controllers/nodes-controller');
 const networkController = require('./src/controllers/network-connection-controller');
-const TodoListsService = require('./src/services/todo-lists-service');
 const NodeInitializerService = require('./src/services/node-initializer-service');
 const NodeHealthCheckCron = require('./src/crons/node-health-check-cron');
 const nodeHealthCheckCron = new NodeHealthCheckCron();
-
-const ClusterPortsRepository = require('./src/repositories/cluster-ports-repository');
 
 const port = process.argv[2];
 if (!port) {
