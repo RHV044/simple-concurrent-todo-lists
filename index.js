@@ -9,6 +9,9 @@ const healthCheckController = require('./src/controllers/health-check-controller
 const todoListsController = require('./src/controllers/todo-lists-controller');
 const nodeController = require('./src/controllers/nodes-controller');
 const TodoListsService = require('./src/services/todo-lists-service');
+const NodeInitializerService = require('./src/services/node-initializer-service');
+const NodeHealthCheckCron = require('./src/crons/node-health-check-cron');
+const nodeHealthCheckCron = new NodeHealthCheckCron();
 
 const ClusterPortsRepository = require('./src/repositories/cluster-ports-repository');
 
@@ -45,21 +48,13 @@ app.use('/node', nodeController);
 const server = app.listen(port, () => {
     Utils.log(`Listening on port ${port}`)
     Config.setSelfPort(port)
-    axios
-        .post(`${Utils.getUrlForPort(Config.getRegistryPort())}/node`, { port: port })
-        .then(
-            (response) => {
-                ClusterPortsRepository.getInstance().addAll(response.data.ports);
-                Utils.log(`Success initialization on registry. Available nodes are: ${ClusterPortsRepository.getInstance().list()}`);
-
-                Utils.log('Proceeding to update node with all available TodoLists...');
-                new TodoListsService().fetchAllListsByQuorum()
-            },
-            (error) => {
-                if (error.data) Utils.log(error.data);
-                server.close(() => Utils.log("Closed server since we cannot connect to the registry"));
-            }
-        );
+    NodeInitializerService.init(port, (isSuccessfull) => {
+        if (isSuccessfull) {
+            nodeHealthCheckCron.start()
+        } else {
+            server.close(() => Utils.log("Closed server since we cannot connect to the registry"))
+        }
+    });
 });
 
 // Gracefull stop by listening to Signal Interruption (ctrl+c)
