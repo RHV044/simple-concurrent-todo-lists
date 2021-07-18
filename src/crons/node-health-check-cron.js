@@ -1,6 +1,3 @@
-const { default: axios } = require('axios');
-const NodesService = require('../services/nodes-service');
-const nodesService = new NodesService();
 const Utils = require('../utils');
 const Config = require('../config');
 const cron = require('node-cron');
