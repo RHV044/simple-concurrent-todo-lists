@@ -68,7 +68,8 @@ else # Only running as root
     echo "====================================================="
     read -p "Vamos a matar la conexión del nodo 9001 (sigue corriendo el proceso pero aislado)... ENTER"
     echo "====================================================="
-    iptables -I INPUT -p tcp --dport 9001 -j REJECT
+    # iptables -I INPUT -p tcp --dport 9001 -j REJECT
+     curl -H $content -X POST -d '{"time": 60000}' http://localhost:9001/network/lost
 
 
     echo ""
@@ -94,7 +95,8 @@ else # Only running as root
     echo "====================================================="
     read -p "Que pasa si perdemos conexion con el registry 9000 (no se puede cambiar topologia de red) e insertamos datos... ENTER"
     echo "====================================================="
-    iptables -I INPUT -p tcp --dport 9000 -j REJECT
+    #iptables -I INPUT -p tcp --dport 9000 -j REJECT
+     curl -H $content -X POST -d '{"time": 60000}' http://localhost:9000/network/lost
     # TODO: Actualiar hash con lo del PATCH anterior
     curl -H $content -H $hash -X POST -d '{"item":{"text":"EstoSeAgregoConElRegistry9000Caido","done":true}}' http://localhost:9004/lists/1/items
 
