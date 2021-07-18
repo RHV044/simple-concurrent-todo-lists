@@ -8,15 +8,37 @@ const Config = require('./src/config');
 const healthCheckController = require('./src/controllers/health-check-controller');
 const todoListsController = require('./src/controllers/todo-lists-controller');
 const nodeController = require('./src/controllers/nodes-controller');
-const TodoListsService = require('./src/services/todo-lists-service');
-
-const ClusterPortsRepository = require('./src/repositories/cluster-ports-repository');
+const networkController = require('./src/controllers/network-connection-controller');
+const NodeInitializerService = require('./src/services/node-initializer-service');
+const NodeHealthCheckCron = require('./src/crons/node-health-check-cron');
+const nodeHealthCheckCron = new NodeHealthCheckCron();
 
 const port = process.argv[2];
 if (!port) {
     console.error("ERROR: Please specify the port!");
     return;
 }
+
+// Interceptor for simulates internet connection
+app.use(function(req, res, next) {
+  if (!Config.hasInternet) {
+    Utils.log(`Simulates error for incoming request: ${req.method} ${req.url}`)
+    res.status(404).send();
+  } else {
+    next();
+  }
+});
+axios.interceptors.request.use(req => {
+    if (!Config.hasInternet) {
+        Utils.log(`Simulates error for outcoming request: ${req.method} ${req.url}`)
+        const mockError = new Error()
+        mockError.mockData = mocks[req.url]
+        mockError.config = req
+        return Promise.reject(mockError)
+    }
+    // Important: request interceptors **must** return the request.
+    return req;
+});
 
 app.use(express.json());
 // Add headers
@@ -41,25 +63,19 @@ app.use(function (req, res, next) {
 app.use('/health-check', healthCheckController);
 app.use('/lists', todoListsController);
 app.use('/node', nodeController);
+app.use('/network', networkController);
 
 const server = app.listen(port, () => {
     Utils.log(`Listening on port ${port}`)
     Config.setSelfPort(port)
-    axios
-        .post(`${Utils.getUrlForPort(Config.getRegistryPort())}/node`, { port: port })
-        .then(
-            (response) => {
-                ClusterPortsRepository.getInstance().addAll(response.data.ports);
-                Utils.log(`Success initialization on registry. Available nodes are: ${ClusterPortsRepository.getInstance().list()}`);
-
-                Utils.log('Proceeding to update node with all available TodoLists...');
-                new TodoListsService().fetchAllListsByQuorum()
-            },
-            (error) => {
-                if (error.data) Utils.log(error.data);
-                server.close(() => Utils.log("Closed server since we cannot connect to the registry"));
-            }
-        );
+    Config.setHasInternet(true)
+    NodeInitializerService.init(port, (isSuccessfull) => {
+        if (isSuccessfull) {
+            nodeHealthCheckCron.start()
+        } else {
+            server.close(() => Utils.log("Closed server since we cannot connect to the registry"))
+        }
+    });
 });
 
 // Gracefull stop by listening to Signal Interruption (ctrl+c)

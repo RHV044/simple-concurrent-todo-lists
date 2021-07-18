@@ -108,14 +108,17 @@ function doBackendApiCall(type, endpoint, listId = null, body = null) {
     const listHash = listId != null ? getTodoListHash(listId) : null;
     const headers = listHash != null ? { 'X-List-Hash': listHash } : null;
     return askForNode()
-        .then((response) => $.ajax({
-            url: `http://localhost:${response.port}/${endpoint}`,
-            type: type,
-            headers: headers,
-            data: body != null ? JSON.stringify(body) : null,
-            contentType: "application/json; charset=utf-8",
-            dataType: "json"
-        }))
+        .then((response) => {
+            $('#last-used-port').html(response.port)
+            return $.ajax({
+                url: `http://localhost:${response.port}/${endpoint}`,
+                type: type,
+                headers: headers,
+                data: body != null ? JSON.stringify(body) : null,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json"
+            })
+        })
 }
 
 function getTodoListHash(listId) {

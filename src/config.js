@@ -16,6 +16,10 @@ class Config {
         this.selfPort = port;
     }
 
+    static setHasInternet(hasInternet) {
+        this.hasInternet = hasInternet;
+    }
+
 }
 
 module.exports = Config
