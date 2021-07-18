@@ -14,7 +14,7 @@ class NodesService {
     }
 
     add(port) {
-        if (ClusterPortsRepository.getInstance().exists(port)) return
+        if (ClusterPortsRepository.getInstance().exists(port)) return ClusterPortsRepository.getInstance().list()
 
         // If it's the registry then we should let know the nodes that a new port is available.
         if (Config.isRegistry) {

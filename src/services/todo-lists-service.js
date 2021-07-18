@@ -22,6 +22,8 @@ class TodoListsService {
     }
 
     fetchAllListsByQuorum() {
+        if (nodesService.getAllButSelf().length == 0) return
+
         const allListsResponse = Utils.flatMap(nodesService.getAllButSelf(), node => {
             return axios.get(Utils.getUrlForPort(node) + '/lists');
         })

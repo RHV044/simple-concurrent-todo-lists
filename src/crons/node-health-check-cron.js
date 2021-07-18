@@ -2,6 +2,7 @@ const { default: axios } = require('axios');
 const NodesService = require('../services/nodes-service');
 const nodesService = new NodesService();
 const Utils = require('../utils');
+const Config = require('../config');
 const cron = require('node-cron');
 const NodeInitializerService = require('../services/node-initializer-service');
 
@@ -23,7 +24,7 @@ class NodeHealthCheckCron {
          *  * * * * * *
          */
         this.hadInternet = true
-        this.cron = cron.schedule(`0 */1 * * * *`, () => this.doHealthCheck())
+        this.cron = cron.schedule(`*/10 * * * * *`, () => this.doHealthCheck())
     }
 
     stop() {
@@ -41,13 +42,17 @@ class NodeHealthCheckCron {
     }
 
     checkInternet(onResponse) {
-        require('dns').lookup('google.com', (error) => {
-            if (error && error.code == "ENOTFOUND") {
-                onResponse(false);
-            } else {
-                onResponse(true);
-            }
-        })
+        if (!Config.hasInternet) {
+            onResponse(false)
+        } else {
+            require('dns').lookup('google.com', (error) => {
+                if (error && error.code == "ENOTFOUND") {
+                    onResponse(false);
+                } else {
+                    onResponse(true);
+                }
+            })
+        }
     }
 }
 

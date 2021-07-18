@@ -9,12 +9,12 @@ class ClusterPortsRepository {
     }
 
     add(port) {
-        if (this.exists(port)) return;
+        if (!port || this.exists(port)) return;
         this.ports.push(port);
     }
 
     addAll(ports) {
-        this.ports = this.ports.concat(ports);
+        this.ports = this.ports.concat(ports).filter(port => port);
     }
 
     remove(port) {

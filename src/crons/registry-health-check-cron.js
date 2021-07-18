@@ -23,7 +23,7 @@ class RegistryHealthCheckCron {
          *  │ │ │ │ │ │
          *  * * * * * *
          */
-        this.cron = cron.schedule(`0 */10 * * * *`, () => this.doHealthCheck());
+        this.cron = cron.schedule(`*/10 * * * * *`, () => this.doHealthCheck());
     }
 
     stop() {
@@ -43,7 +43,7 @@ class RegistryHealthCheckCron {
                 () => {
                     if (pendingRetries > 0) {
                         Utils.log(`The port ${port} is down, retrying...`);
-                        setTimeout(() => this.doHealthCheckOnNode(port, pendingRetries - 1), 60000 * (TOTAL_RETRIES - pendingRetries + 1));
+                        setTimeout(() => this.doHealthCheckOnNode(port, pendingRetries - 1), 1000);
                     } else {
                         Utils.log(`The port ${port} is down`);
                         nodesService.delete(port);
