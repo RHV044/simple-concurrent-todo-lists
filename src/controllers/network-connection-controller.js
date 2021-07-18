@@ -4,13 +4,13 @@ const Utils = require('../utils');
 const Config = require('../config');
 
 /** 
- * POST /connection/lost 
+ * POST /networwk/lost 
  * { time: 3000 }
  * 
- * Simulates a connection lost for given time in ms.
+ * Simulates a network connection lost for given time in ms.
  */
 router.post('/lost', (req, res) => {
-    Utils.log(`Simulates connection lost for ${req.body.time}ms.`)
+    Utils.log(`Simulates network connection lost for ${req.body.time}ms.`)
     Config.setHasInternet(false)
     setTimeout(() => {
         Utils.log("Connection recovered")
