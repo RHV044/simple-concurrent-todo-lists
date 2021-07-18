@@ -11,7 +11,7 @@ class NodeInitializerService {
             .post(`${Utils.getUrlForPort(Config.getRegistryPort())}/node`, { port: port })
             .then(
                 (response) => {
-                    ClusterPortsRepository.getInstance().addAll(response.data.ports)
+                    ClusterPortsRepository.getInstance().set(response.data.ports)
                     Utils.log(`Success initialization on registry. Available nodes are: ${ClusterPortsRepository.getInstance().list()}`)
                     Utils.log('Proceeding to update node with all available TodoLists...')
                     new TodoListsService().fetchAllListsByQuorum()

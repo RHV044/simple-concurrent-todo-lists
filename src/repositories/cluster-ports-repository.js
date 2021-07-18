@@ -13,8 +13,8 @@ class ClusterPortsRepository {
         this.ports.push(port);
     }
 
-    addAll(ports) {
-        this.ports = this.ports.concat(ports).filter(port => port);
+    set(ports) {
+        this.ports = ports.filter(port => port);
     }
 
     remove(port) {
