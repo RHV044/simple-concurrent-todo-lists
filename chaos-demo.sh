@@ -25,17 +25,17 @@ else # Only running as root
     echo "====================================================="
     read -p "Levantamos el Registry + 3 nodos + la Interfaz Grafica... ENTER"
     echo "====================================================="
-    gnome-terminal -- npm run startRegistry
-    gnome-terminal -- npm start --port 9001
-    gnome-terminal -- npm start --port 9002
-    gnome-terminal -- npm start --port 9003
+    sudo -u $nonRootUser gnome-terminal -- npm run startRegistry
+    sudo -u $nonRootUser gnome-terminal -- npm start --port 9001
+    sudo -u $nonRootUser gnome-terminal -- npm start --port 9002
+    sudo -u $nonRootUser gnome-terminal -- npm start --port 9003
     sudo -u $nonRootUser google-chrome ./frontend/index.html
     echo ""
     echo "====================================================="
     read -p "Crea 2 listas vacias, distintas e impactando en nodos distintos... ENTER"
     echo "====================================================="
     content="Content-Type:application/json";
-    hash="x-list-hash:2914";
+    hash="x-list-hash:avoid";
     curl -H $content -H $hash -X POST -d '{"list":{"title":"Primera lista","creator":"script"}}' http://localhost:9001/lists
     curl -H $content -H $hash -X POST -d '{"list":{"title":"Listerna","creator":"script"}}' http://localhost:9002/lists
 
@@ -62,7 +62,7 @@ else # Only running as root
     echo "====================================================="
     read -p "Al modificar la lista en este nodo nuevo, se replica tambien en todos los demas... ENTER"
     echo "====================================================="
-    hash="x-list-hash:-1970392825";
+
     curl -H $content -H $hash -X POST -d '{"item":{"text":"EstoSeAgregoEnElNodo9004","done":false}}' http://localhost:9001/lists/1/items
     echo ""
     echo "====================================================="
@@ -76,19 +76,9 @@ else # Only running as root
     echo "====================================================="
     read -p "Agregamos información al cluster... ENTER"
     echo "====================================================="
-    hash="x-list-hash:1796987108"
+    
     curl -H $content -H $hash -X PUT -d '{"text":"EstoSeEditoCon9001Caido"}' http://localhost:9002/lists/1/items/0
-    # TODO: actualizar hash aca con lo del PUT anterior
     curl -H $content -H $hash -X PATCH http://localhost:9002/lists/1/items/0/done?status=true
-
-
-    echo ""
-    echo "====================================================="
-    read -p "Levantamos devuelta 9001 y deberia sincronizarse con todo eventualmente... ENTER"
-    echo "====================================================="
-    iptables -I INPUT -p tcp --dport 9001 -j ACCEPT
-
-
 
 
     echo ""
@@ -97,7 +87,7 @@ else # Only running as root
     echo "====================================================="
     #iptables -I INPUT -p tcp --dport 9000 -j REJECT
      curl -H $content -X POST -d '{"time": 60000}' http://localhost:9000/network/lost
-    # TODO: Actualiar hash con lo del PATCH anterior
+    echo ""
     curl -H $content -H $hash -X POST -d '{"item":{"text":"EstoSeAgregoConElRegistry9000Caido","done":true}}' http://localhost:9004/lists/1/items
 
     echo ""
