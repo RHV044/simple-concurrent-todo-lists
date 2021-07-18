@@ -131,7 +131,7 @@ class TodoListsService {
     performAction(hash, id, action) {
         // Check the list hash version for front-end concurrency conflicts
         let todoList = listRepository.findList(id)
-        if (Utils.generateListHash(todoList.list) != hash) {
+        if (hash != "avoid" && Utils.generateListHash(todoList.list) != hash) {
             Utils.log("Error updating the list, invalid list hash version")
             return Promise.resolve(this.error("Unable to update list because it's an older version. Please reload the page."))
         }
@@ -179,7 +179,7 @@ class TodoListsService {
                     throw `No quorum achieved for list ${id}!`
                 }
 
-                listRepository.updateList(id, quorumList.list)
+                this.updateAndUnlockList(id, quorumList.list)
             })
             .catch(error => {
                 Utils.log(`Error reading from quorum for list ${id}`, error && error.response && error.response.data)
